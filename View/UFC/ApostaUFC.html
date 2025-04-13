@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-br"> 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aposte-UFC | uniBET</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f0f0;
+    }
+    .fight-details, .bet-form {
+      background-color: #fff;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .fight-details h2 {
+      margin-top: 0;
+    }
+    .bet-form label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .bet-form input, .bet-form select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .bet-form button {
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .bet-form button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bet on Selected Fight</h1>
+  
+  <div id="fightDetails" class="fight-details">
+    <p>Loading fight details...</p>
+  </div>
+  
+  <div id="betFormContainer" class="bet-form" style="display: none;">
+    <h2>Place Your Bet</h2>
+    <form id="betForm">
+      <div>
+        <label for="winner">Winner:</label>
+        <select id="winner" name="winner"></select>
+      </div>
+      <div>
+        <label for="round">Round:</label>
+        <select id="round" name="round"></select>
+      </div>
+      <div>
+        <label for="method">Method:</label>
+        <select id="method" name="method">
+          <option value="KO">KO</option>
+          <option value="SUB">SUB</option>
+          <option value="UD">UD</option>
+          <option value="SD">SD</option>
+          <option value="DRAW">DRAW</option>
+        </select>
+      </div>
+      <button type="submit">BET</button>
+    </form>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const eventId = localStorage.getItem("redirecionamento");
+      const selectedFightId = localStorage.getItem("subredirecionamento");
+      
+      if (!eventId || !selectedFightId) {
+        document.getElementById("fightDetails").textContent = "Missing event or fight information.";
+        return;
+      }
+      
+      fetch(`/ufc/eventos/bet?idUFC=${encodeURIComponent(eventId)}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error(response.statusText);
+        return response.json();
+      })
+      .then(data => {
+        const fightDetailsDiv = document.getElementById("fightDetails");
+        if (!data.ufc || data.ufc.length === 0) {
+          fightDetailsDiv.textContent = "No event data found.";
+          return;
+        }
+        const event = data.ufc[0];
+        if (!event.lutas) {
+          fightDetailsDiv.textContent = "No fight details available.";
+          return;
+        }
+        
+        let fights = [];
+        try {
+          fights = JSON.parse(event.lutas);
+        } catch(e) {
+          console.error("Error parsing fights:", e);
+          fightDetailsDiv.textContent = "Error loading fight details.";
+          return;
+        }
+        
+        const fight = fights.find(f => f.id.toString() === selectedFightId.toString());
+        
+        if (!fight) {
+          fightDetailsDiv.textContent = "Selected fight not found in event data.";
+          return;
+        }
+        
+        fightDetailsDiv.innerHTML = `
+          <h2>${event.evento}</h2>
+          <p><strong>Fight:</strong> ${fight.redFighter} vs ${fight.blueFighter}</p>
+          <p><strong>Weight Class:</strong> ${fight.weightClass}</p>
+        `;
+        
+        const winnerSelect = document.getElementById("winner");
+        winnerSelect.innerHTML = "";
+
+        const redOption = document.createElement("option");
+        redOption.value = "1";
+        redOption.textContent = fight.redFighter;
+
+        const blueOption = document.createElement("option");
+        blueOption.value = "2";
+        blueOption.textContent = fight.blueFighter;
+
+        winnerSelect.appendChild(redOption);
+        winnerSelect.appendChild(blueOption);
+
+        let roundOptions = [];
+        if (fight.id === 1 || fight.id === 2) {
+          roundOptions = [1, 2, 3, 4, 5];
+        } else {
+          roundOptions = [1, 2, 3];
+        }
+        
+        const roundSelect = document.getElementById("round");
+        roundSelect.innerHTML = "";
+        roundOptions.forEach(r => {
+          const option = document.createElement("option");
+          option.value = r;
+          option.textContent = `Round ${r}`;
+          roundSelect.appendChild(option);
+        });
+        
+        document.getElementById("betFormContainer").style.display = "block";
+      })
+      .catch(error => {
+        console.error("Error fetching event details:", error);
+        document.getElementById("fightDetails").textContent = "Error fetching event details.";
+      });
+      
+      document.getElementById("betForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const round = document.getElementById("round").value;
+        const method = document.getElementById("method").value;
+        const winner = document.getElementById("winner").value;
+        const info = JSON.parse(localStorage.getItem("informacao"));
+        const idUsuario = info.idUsuario; 
+        
+        const data = {
+          idUsuario: idUsuario,
+          eventID: eventId,
+          FightID: selectedFightId,
+          winner: winner,
+          round: round,
+          method: method
+        };
+        
+        fetch(`/ufc`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        })
+        .then(response => {
+          if (!response.ok) throw new Error(response.statusText);
+          return response.json();
+        })
+        .then(result => {
+          alert("Bet submitted successfully!");
+          window.location.href = "/ufc/bet";
+        })
+        .catch(error => {
+          console.error("Error submitting bet:", error);
+          alert("Error submitting bet.");
+        });
+      });
+    });
+  </script>
+</body>
+</html>

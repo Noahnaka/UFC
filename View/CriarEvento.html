@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/icon.png" type="image/x-icon">
+    <title>Criar Evento | uniBET</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <script>
+        function generateCode() {
+            let btn = document.getElementById("btnGenerate");
+            if (btn.disabled) return;
+            
+            let randomNumbers = Math.floor(100 + Math.random() * 900); // Generates a random 3-digit number
+            let randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
+            let code = `${randomNumbers}-${randomPart}`;
+            document.getElementById("generatedCode").innerText = `Código Gerado: ${code}`;
+            
+            btn.disabled = true;
+            checkFormCompletion();
+        }
+        
+        function checkFormCompletion() {
+            let nameFilled = document.getElementById("txtNome").value.trim() !== "";
+            let codeGenerated = document.getElementById("btnGenerate").disabled;
+            let teamsFilled = document.querySelectorAll(".team-input").length > 0 && 
+                              [...document.querySelectorAll(".team-input")].every(input => input.value.trim() !== "");
+            document.getElementById("btnLogin").disabled = !(nameFilled && codeGenerated && teamsFilled);
+        }
+
+        function generateTeamSections() {
+            let numTeams = parseInt(document.getElementById("teamsInput").value);
+            let teamsContainer = document.getElementById("teamsContainer");
+            teamsContainer.innerHTML = "";
+
+            if (numTeams % 2 !== 0 || numTeams < 2) {
+                teamsContainer.innerHTML = "<p>Por favor, insira um número par de times (mínimo 2).</p>";
+                return;
+            }
+
+            for (let i = 1; i <= numTeams; i += 2) {
+                let matchDiv = document.createElement("div");
+                matchDiv.innerHTML = `
+                    <p>Insira os nomes das equipes:</p>
+                    <input type="text" class="team-input" placeholder="Time ${i}" oninput="checkFormCompletion()">
+                    <span> x </span>
+                    <input type="text" class="team-input" placeholder="Time ${i + 1}" oninput="checkFormCompletion()">
+                `;
+                teamsContainer.appendChild(matchDiv);
+            }
+            checkFormCompletion();
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("txtNome").addEventListener("input", checkFormCompletion);
+            document.getElementById("teamsInput").addEventListener("input", generateTeamSections);
+        });
+    </script>
+</head>
+<body>
+  <div class="container">
+      <form class="form">
+          <div class="form_front">
+              <input placeholder="Nome do evento" id="txtNome" class="input" type="text" required>
+              <br>
+              <input placeholder="Quantidade de times" id="teamsInput" class="input" type="number" min="2" required>
+              <br>
+              <div id="teamsContainer"></div>
+              <br>
+              <button id="btnLogin" class="btn" disabled>Criar</button>
+              <br><br>
+              <button type="button" id="btnGenerate" class="btn" onclick="generateCode()">Gerar Código</button>
+              <p id="generatedCode"></p>
+          </div>
+      </form>
+  </div>
+</body>
+<script>
+    const info = JSON.parse(localStorage.getItem("informacao"));
+
+    if (!info || !info.idUsuario) {
+        window.location.href = "Index.html";
+    }
+
+     function criarEvento() {
+            const nomeEvento = document.getElementById("txtNome").value;
+            const codigoEvento = document.getElementById("generatedCode").innerText.replace("Código Gerado: ", "");
+            const teams = [...document.querySelectorAll(".team-input")].map(input => input.value);
+
+            const eventoData = {
+                nomeEvento: nomeEvento,
+                codigoEvento: codigoEvento,
+                teams: teams
+            };
+
+            fetch("/Evento", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(eventoData)
+            }).then(response => response.text())
+              .then(text => {
+                  console.log(text);
+              })
+              .catch(error => console.error(error));
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("txtNome").addEventListener("input", checkFormCompletion);
+            document.getElementById("teamsInput").addEventListener("input", generateTeamSections);
+            document.getElementById("btnLogin").addEventListener("click", function(event) {
+                event.preventDefault();
+                criarEvento();
+            });
+        });
+</script>
+</html>

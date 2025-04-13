@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evento UFC | uniBET</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f0f0;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .fight-card {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .fight-card p {
+      margin: 5px 0;
+    }
+    .bet-button {
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .bet-button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bet on Fights</h1>
+  <div id="fightContainer">
+    <p>Loading event and fights...</p>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const info = JSON.parse(localStorage.getItem("informacao") || "{}");
+      const idUsuario = info.idUsuario;
+      const eventId = localStorage.getItem("redirecionamento");
+  
+      if (!idUsuario || !eventId) {
+        window.location.href = "/Main";
+      }
+  
+      const fightContainer = document.getElementById("fightContainer");
+      let apostados = [];
+  
+      fetch(`/ufc/bets?idUsuario=${encodeURIComponent(idUsuario)}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to fetch user bets");
+          return res.json();
+        })
+        .then(bets => {
+          apostados = bets.ufc || [];
+  
+          return fetch(`/ufc/eventos/bet?idUFC=${encodeURIComponent(eventId)}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+          });
+        })
+        .then(response => {
+          if (!response.ok) throw new Error(response.statusText);
+          return response.json();
+        })
+        .then(data => {
+          if (!data || !data.ufc || data.ufc.length === 0) {
+            fightContainer.textContent = "No event data found.";
+            return;
+          }
+  
+          const event = data.ufc[0];
+          fightContainer.innerHTML = `
+            <h2>${event.evento}</h2>
+            <p><strong>Date:</strong> ${event.data}</p>
+            <p><strong>Location:</strong> ${event.local}</p>
+          `;
+  
+          let fights = [];
+          try {
+            fights = JSON.parse(event.lutas);
+          } catch (e) {
+            fightContainer.innerHTML += "<p>Error loading fights.</p>";
+            return;
+          }
+  
+          const lutasDisponiveis = fights.filter(fight => {
+            return !apostados.some(aposta => 
+              aposta.idUFC === fight.id && aposta.idEvento.toString() === eventId.toString()
+            );
+          });
+  
+          if (lutasDisponiveis.length === 0) {
+            fightContainer.innerHTML += "<p>No available fights to bet.</p>";
+            return;
+          }
+  
+          lutasDisponiveis.forEach((fight, index) => {
+            const card = document.createElement("div");
+            card.className = "fight-card";
+            card.innerHTML = `
+              <p><strong>Fight ID:</strong> ${fight.id}</p>
+              <p><strong>Fight ${index + 1}:</strong> ${fight.redFighter} vs ${fight.blueFighter}</p>
+              <p><strong>Weight Class:</strong> ${fight.weightClass}</p>
+            `;
+            const betBtn = document.createElement("button");
+            betBtn.className = "bet-button";
+            betBtn.textContent = "BET";
+            betBtn.addEventListener("click", function () {
+              localStorage.setItem("subredirecionamento", fight.id);
+              window.location.href = "/ufc/bet/fight";
+            });
+            card.appendChild(betBtn);
+            fightContainer.appendChild(card);
+          });
+        })
+        .catch(error => {
+          fightContainer.textContent = "Error fetching data.";
+          console.error(error);
+        });
+    });
+  </script>
+</body>
+</html>

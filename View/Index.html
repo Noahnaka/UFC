@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/icon.png" type="image/x-icon">
+    <title>Bem-vindo | uniBET</title>
+    <link rel="stylesheet" href="css/login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+	<script>
+		function formatTelefone(telField) {
+        	telField.value = telField.value
+            .replace(/\D/g, '')  
+            .substring(0, 11)   
+            .replace(/(\d{2})(\d)/, '($1)$2')  
+            .replace(/(\d{5})(\d)/, '$1-$2');  
+        }
+	</script>
+</head>
+<body>
+  <div class="container">
+      <input type="checkbox" id="signup_toggle">
+      <form class="form">
+          <div class="form_front">
+              <img src="images/logo.png" alt="Logo" class="logo"> 
+              <div class="form_details">Login</div>
+              <input placeholder="Email" id="txtEmail" class="input" type="email" required>
+              <input placeholder="Senha" id="txtSenha" class="input" type="password" required>
+              <button id="btnLogin" class="btn">Login</button>
+              <span class="switch">Ainda não tem conta? 
+                  <label class="signup_tog" for="signup_toggle">
+                      Registre-se agora!
+                  </label>
+              </span>
+			  <div id="divLogin" style="margin-bottom: -2em;"></div>
+          </div>
+
+
+          <div class="form_back">
+            <img src="images/logo.png" alt="logo" class="logo">
+              <div class="form_details">Cadastrar</div>
+              <input placeholder="Nome" id="txtNomeCadastro" class="input" type="text">
+              <input placeholder="Email" id="txtEmailCadastro" class="input" type="email">
+              <input placeholder="Telefone" id="txtTelefoneCadastro" oninput="formatTelefone(this)" pattern="\(\d{2}\)\d{5}-\d{4}" class="input" type="text">
+              <input placeholder="Senha" id="txtSenhaCadastro" class="input" type="text">
+              <input placeholder="Nascimento" id="txtNascimento" class="input" type="date">
+              <button id="btnCadastro" class="btn">Registre-se</button>
+              <span class="switch">Já tem conta? 
+                  <label class="signup_tog" for="signup_toggle">
+                      Login
+                  </label>
+              </span>
+          </div>
+      </form>
+  </div>
+  
+</body>
+<script>
+	const info = JSON.parse(localStorage.getItem("informacao"));
+
+	if (info && info.idUsuario) {
+		window.location.href = "/Main";
+	} 
+
+	const btnLogin = document.getElementById('btnLogin');
+	const btnCadastro = document.getElementById('btnCadastro');
+	const divLogin = document.getElementById("divLogin");
+
+	btnLogin.onclick = function (event) {
+		event.preventDefault(); 
+		fazerLogin();
+	}
+
+	btnCadastro.onclick = function (event) {
+		event.preventDefault();
+		fazerCadastro();
+	}
+
+	function fazerCadastro () {
+		const txtEmailCadastro = document.getElementById("txtEmailCadastro");
+		const txtNomeCadastro = document.getElementById("txtNomeCadastro");
+		const txtTelefoneCadastro = document.getElementById("txtTelefoneCadastro");
+		const txtSenhaCadastro = document.getElementById("txtSenhaCadastro");
+		const txtNascimento = document.getElementById("txtNascimento");
+		const emailCadastro = txtEmailCadastro.value;
+		const nomeCadastro = txtNomeCadastro.value;
+		const telefoneCadastro = txtTelefoneCadastro.value;
+		const senhaCadastro = txtSenhaCadastro.value;
+		const nascimento = txtNascimento.value;
+
+		const obj_json = {
+			Cadastros: {
+				emailCadastro: emailCadastro,
+				nomeCadastro: nomeCadastro,
+				telefoneCadastro: telefoneCadastro,
+				senhaCadastro: senhaCadastro,
+				nascimentoCadastro: nascimento
+			}
+		}
+		const uri = '/Cadastro';
+		fetch(uri, {
+			method: "POST",
+			headers: {
+               'Content-Type': 'application/json',
+            },
+			body: JSON.stringify(obj_json)
+		}).then((resposta_backEnd)=>{
+			return resposta_backEnd.text();
+		}).then((texto_resposta_back)=>{
+		   console.log(texto_resposta_back);
+		   processarResultados(texto_resposta_back);
+		}).catch((error)=>{
+			console.log(error);
+		})
+
+		function processarResultados(texto_json){
+		const obj_json = JSON.parse(texto_json);
+
+		if(obj_json.status==false){
+		   divResposta.textContent = "";
+		   const lblReposta = document.createElement("p")
+		   lblReposta.textContent = "Algum dado errado.";
+		   lblReposta.style.color = "red"; 
+		   divResposta.appendChild(lblReposta);
+		}else{
+			localStorage.setItem("informacao",texto_json);
+			window.location.href = "/Main";
+		}
+	}
+	}
+
+
+	function fazerLogin() {
+		const txtEmail = document.getElementById("txtEmail");
+		const txtSenha = document.getElementById("txtSenha");
+		const email = txtEmail.value;
+		const senha = txtSenha.value;
+
+		const obj_json = {
+			logins: {
+				email: email,
+				senha: senha
+			}
+		}
+		const uri = '/Login';
+		fetch(uri, {
+			method: "POST",
+			body: JSON.stringify(obj_json)
+		}).then((resposta_backEnd)=>{
+			return resposta_backEnd.text();
+		}).then((texto_resposta_back)=>{
+		   console.log(texto_resposta_back);
+		   processarResultados(texto_resposta_back);
+		}).catch((error)=>{
+			console.log(error);
+		})
+	}
+	function processarResultados(texto_json){
+		const obj_json = JSON.parse(texto_json);
+
+		if(obj_json.status==false){
+			divLogin.textContent = "";
+		   const lblReposta = document.createElement("p")
+		   lblReposta.textContent = "Usuário ou senha inválida.";
+		   lblReposta.style.color = "red"; 
+		   divLogin.appendChild(lblReposta);
+		}else{
+			localStorage.setItem("informacao",texto_json);
+			window.location.href = "/Main";
+		}
+	}
+</script>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Principal | uniBET</title>
+  <style>
+    /* Basic styling for events */
+    .event-container {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .event-container h3 {
+      margin-top: 0;
+      display: inline-block;
+    }
+    .closed-text {
+      color: red;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .bet-button {
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .bet-button:hover {
+      background-color: #218838;
+    }
+    .bet-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+  <script>
+    function redirectToCriarEvento() {
+      window.location.href = "/CreateEvent";
+    }
+    function redirectToEntrarEvento() {
+      window.location.href = "/JoinEvent";
+    }
+    const info = JSON.parse(localStorage.getItem("informacao"));
+    if (!info || !info.idUsuario) {
+      window.location.href = "/Join";
+    }
+    
+
+    function betEvent(eventId) {
+        localStorage.setItem("redirecionamento", eventId);
+        window.location.href = "/ufc/bet";
+    }
+  </script>
+</head>
+<body>
+  <h1>Hello world</h1>
+  <button onclick="redirectToCriarEvento()">Criar evento</button>
+  <button onclick="redirectToEntrarEvento()">Entrar evento</button>
+
+  <div id="matchesContainer" style="margin-top:20px;">
+    <h2>UFC Matches</h2>
+    <div id="matchList"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/ufc/eventos', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        console.log("Response: " + response);
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("here");
+        const matchList = document.getElementById('matchList');
+        if (data && data.eventos && data.eventos.length > 0) {
+          data.eventos.forEach(match => {
+            console.log("here 2");
+            // Attempt to parse the 'lutas' JSON string
+            let fights = [];
+            try {
+              fights = JSON.parse(match.lutas);
+            } catch(e) {
+              console.error('Error parsing lutas JSON:', e);
+            }
+            // Display details of the first fight, if available
+            let fightDetails = '';
+            if (fights.length > 0) {
+              const fight = fights[0];
+              fightDetails = `${fight.redFighter} vs ${fight.blueFighter} | Peso: ${fight.weightClass} | Método: ${fight.method} | Round: ${fight.round} | Tempo: ${fight.time}`;
+            }
+            
+            // Determine if betting is allowed.
+            // Condition 1: If fight details have non-empty Método, Round and Tempo, betting is closed.
+            let bettingAllowed = true;
+            if (fights.length > 0) {
+              const fight = fights[0];
+              if (fight.method.trim() !== "" && fight.round.trim() !== "" && fight.time.trim() !== "") {
+                bettingAllowed = false;
+              }
+            }
+            // Condition 2: If the event date/time is within the next 10 minutes, betting is closed.
+            let eventDate = new Date(match.data);
+            const now = Date.now();
+            const diff = eventDate.getTime() - now; // difference in milliseconds
+            if (diff <= 10 * 60 * 1000) {
+              bettingAllowed = false;
+            }
+            
+            // Build the event name with a closed label if betting is not allowed.
+            let eventName = match.evento;
+            if (!bettingAllowed) {
+              eventName += ' <span class="closed-text">APOSTAS ENCERRADO</span>';
+            }
+            
+            // Build the BET button, enabled or disabled accordingly.
+            let betButtonHtml = '';
+            if (bettingAllowed) {
+              betButtonHtml = `<button class="bet-button" onclick="betEvent(${match.idUFC})">BET</button>`;
+            } else {
+              betButtonHtml = `<button class="bet-button" disabled>BET</button>`;
+            }
+            
+            const matchElement = document.createElement('div');
+            matchElement.className = 'event-container';
+            matchElement.innerHTML = `
+              <h3>${eventName}</h3>
+              <p><strong>Data:</strong> ${match.data} <br>
+                 <strong>Local:</strong> ${match.local}</p>
+              <p><strong>Luta:</strong> ${fightDetails}</p>
+              ${betButtonHtml}
+            `;
+            matchList.appendChild(matchElement);
+          });
+        } else {
+          matchList.textContent = 'No matches found.';
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching UFC matches:', error);
+      });
+    });
+  </script>
+</body>
+</html>
