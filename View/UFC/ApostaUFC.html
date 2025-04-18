@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Aposte-UFC | uniBET</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -66,10 +67,10 @@
       <div>
         <label for="method">Method:</label>
         <select id="method" name="method">
-          <option value="KO">KO</option>
-          <option value="SUB">SUB</option>
-          <option value="UD">UD</option>
-          <option value="SD">SD</option>
+          <option value="KO">Knockout</option>
+          <option value="SUB">Submission</option>
+          <option value="UD">Unanimous  Decision</option>
+          <option value="SD">Split Decision</option>
           <option value="DRAW">DRAW</option>
         </select>
       </div>
@@ -78,9 +79,31 @@
   </div>
   
   <script>
+      const secretKey = "univap";
+      const encryptedInfo = localStorage.getItem("informacao");
+      let info = null;
+
+      try {
+        const decryptedBytes = CryptoJS.AES.decrypt(encryptedInfo, secretKey);
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        info = JSON.parse(decryptedText);
+      } catch (e) {
+        console.error("Erro ao descriptografar dados do usuário:", e);
+        window.location.href = "/Join"; 
+      }
+
+
     document.addEventListener('DOMContentLoaded', function() {
-      const eventId = localStorage.getItem("redirecionamento");
-      const selectedFightId = localStorage.getItem("subredirecionamento");
+      const encryptedId = localStorage.getItem("subredirecionamento");
+      const bytes = CryptoJS.AES.decrypt(encryptedId, secretKey);
+      const selectedFightId = bytes.toString(CryptoJS.enc.Utf8);
+
+      const encryptedId2 = localStorage.getItem("redirecionamento");
+      const bytes2 = CryptoJS.AES.decrypt(encryptedId2, secretKey);
+      const eventId = bytes2.toString(CryptoJS.enc.Utf8);
+
+
+      console.log(selectedFightId);
       
       if (!eventId || !selectedFightId) {
         document.getElementById("fightDetails").textContent = "Missing event or fight information.";
@@ -171,8 +194,13 @@
         const round = document.getElementById("round").value;
         const method = document.getElementById("method").value;
         const winner = document.getElementById("winner").value;
-        const info = JSON.parse(localStorage.getItem("informacao"));
-        const idUsuario = info.idUsuario; 
+        let idUsuario = null;
+
+        const encryptedInfo = localStorage.getItem("informacao");
+        const decryptedBytes = CryptoJS.AES.decrypt(encryptedInfo, secretKey);
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        const info = JSON.parse(decryptedText);
+        idUsuario = info.idUsuario;
         
         const data = {
           idUsuario: idUsuario,
@@ -204,4 +232,5 @@
     });
   </script>
 </body>
+
 </html>

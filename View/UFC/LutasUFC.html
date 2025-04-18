@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Evento UFC | uniBET</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,10 +44,31 @@
   </div>
 
   <script>
+
+    const info = localStorage.getItem("informacao");
+    if (!info) {
+      window.location.href = "/Join";
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
-      const info = JSON.parse(localStorage.getItem("informacao") || "{}");
-      const idUsuario = info.idUsuario;
-      const eventId = localStorage.getItem("redirecionamento");
+      const secretKey = "univap";
+      const encryptedInfo = localStorage.getItem("informacao");
+      let info = null;
+      let idUsuario = null;
+
+      try {
+        const decryptedBytes = CryptoJS.AES.decrypt(encryptedInfo, secretKey);
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        info = JSON.parse(decryptedText);
+        idUsuario = info.idUsuario;
+      } catch (e) {
+        console.error("Erro ao descriptografar dados do usuário:", e);
+        window.location.href = "/Join"; 
+      }
+      const encryptedId = localStorage.getItem("redirecionamento");
+      const bytes = CryptoJS.AES.decrypt(encryptedId, secretKey);
+      const eventId = bytes.toString(CryptoJS.enc.Utf8);
+
   
       if (!idUsuario || !eventId) {
         window.location.href = "/Main";
@@ -119,7 +141,9 @@
             betBtn.className = "bet-button";
             betBtn.textContent = "BET";
             betBtn.addEventListener("click", function () {
-              localStorage.setItem("subredirecionamento", fight.id);
+              const secretKey = "univap"; 
+              const encryptedId = CryptoJS.AES.encrypt(fight.id.toString(), secretKey).toString();
+              localStorage.setItem("subredirecionamento", encryptedId);
               window.location.href = "/ufc/bet/fight";
             });
             card.appendChild(betBtn);

@@ -4,16 +4,16 @@ const Login = require('../Model/Login');
 module.exports = class loginControle { 
 
     async login_read(request, response) {
-        const { emailCadastro, senhaCadastro } = request.body.Logins;
+        const { email, senha } = request.body.data;
 
         var login = new Login();
-        login.emailLogin = emailCadastro;
-        login.senhaLogin = senhaCadastro;
+        login.emailLogin = email;
+        login.senhaLogin = senha;
         const resultado = await login.loginRead();
     
         const objResposta = {
             cod: 1,
-            status: true,
+            status: resultado ? true: false,
             msg: resultado ? 'Login encontrado' : 'Login não encontrado',
             cargo: resultado,
             idUsuario: resultado

@@ -1,0 +1,2 @@
+1- Metodo para metodo de comparação quando for salvar nao esta salvando corretamente
+2- idUFC para salvar o ID da luta nao esta enviando certo, sempre 1

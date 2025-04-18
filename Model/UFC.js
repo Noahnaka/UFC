@@ -17,18 +17,38 @@ class UFC {
     this._lutas = '';
   }
 
-  async create_bet(){
-    const conexao = Banco.getConexao(); 
-    const SQL = 'INSERT INTO apostasufc (idUsuario, idUFC, idEvento, vencedor, metodo, rodada) VALUES (?, ?, ?, ?, ?, ?);'; 
+  async create_bet() {
+    const conexao = Banco.getConexao();
+  
+    const metodoMapeado = {
+      "Unanimous Decision": "U-DEC",
+      "Submission": "SUB",
+      "Split Decision": "S-DEC",
+      "Knockout": "KO/TKO",
+      "DRAW": "DRAW"
+    }
+
+    const metodoFinal = metodoMapeado[this._metodo] || this._metodo;
+  
+    const SQL = 'INSERT INTO apostasufc (idUsuario, idUFC, idEvento, vencedor, metodo, rodada) VALUES (?, ?, ?, ?, ?, ?);';
+  
     try {
-        const [result] = await conexao.promise().execute(SQL, [this._idUsuario, this._idUFC, this._idEvento, this._vencedor, this._metodo, this._rodada]);
-        this._idAposta = result.insertId; 
-        return result.affectedRows > 0; 
+      const [result] = await conexao.promise().execute(SQL, [
+        this._idUsuario,
+        this._idUFC,
+        this._idEvento,
+        this._vencedor,
+        metodoFinal,
+        this._rodada
+      ]);
+      this._idAposta = result.insertId;
+      return result.affectedRows > 0;
     } catch (error) {
-        console.error('Erro ao criar o aposta:', error); 
-        return false; 
+      console.error('Erro ao criar o aposta:', error);
+      return false;
     }
   }
+  
 
   async UFC_read_all() {
     const conexao = Banco.getConexao();
@@ -59,7 +79,6 @@ class UFC {
     const SQL = 'SELECT idUFC, idEvento FROM apostasufc WHERE idUsuario = ?;';
     try {
       const [rows] = await conexao.promise().execute(SQL, [this._idUsuario]);
-      console.log("Response:", rows);
       return rows;
     } catch (error) {
       console.error('Erro ao ler idUFC pelo idUsuario:', error); 
@@ -71,29 +90,73 @@ class UFC {
     const conexao = Banco.getConexao();
   
     try {
-      const SQL = 'SELECT * FROM eventosufc;';
-      const [rowsDB] = await conexao.promise().execute(SQL);
+      // 🔥 1. Deleta apostas do evento anterior
+      await conexao.promise().execute('DELETE FROM apostasufc WHERE idEvento = 2');
+  
+      // 🔁 2. Promove o evento atual para "evento anterior"
+      await conexao.promise().execute('UPDATE apostasufc SET idEvento = 2 WHERE idEvento = 1');
+      await conexao.promise().execute('UPDATE eventosufc SET idUFC = 2 WHERE idUFC = 1');
+  
+      // 🧠 3. Calcula os pontos com base no evento finalizado
+      const [rowsDB] = await conexao.promise().execute('SELECT * FROM eventosufc WHERE idUFC = 2');
       if (rowsDB.length > 0) {
         const evento = rowsDB[0];
+        const lutas = JSON.parse(evento.lutas);
   
-        const idUFC = evento.idUFC;
-        const lutas = JSON.parse(evento.lutas); 
+        const [apostas] = await conexao.promise().execute(
+          'SELECT * FROM apostasufc WHERE idEvento = ?',
+          [evento.idUFC]
+        );
   
-        console.log({ idUFC, lutas});
+        for (const aposta of apostas) {
+          const luta = lutas.find(l => l.id === aposta.idUFC);
+          if (!luta) continue;
+  
+          let pontos = 0;
+  
+          const apostaVencedor = aposta.vencedor == 1 ? 'red' : 'blue';
+          if (apostaVencedor === luta.winner) {
+            pontos += 5;
+            console.log(`🟢 Usuário ${aposta.idUsuario} acertou o VENCEDOR!`);
+          } else {
+            console.log(`🔴 Usuário ${aposta.idUsuario} ERROU o VENCEDOR!`);
+          }
+  
+          const metodoAposta = aposta.metodo.toUpperCase().trim();
+          let metodoReal = 'OUTRO';
+          const methodLower = luta.method.toLowerCase();
+          if (methodLower.includes('ko') || methodLower.includes('tko')) metodoReal = 'KO';
+          else if (methodLower.includes('sub')) metodoReal = 'SUB';
+          else if (methodLower.includes('dec')) metodoReal = 'DEC';
+  
+          if (metodoAposta === metodoReal) {
+            pontos += 5;
+            console.log(`🟢 Usuário ${aposta.idUsuario} acertou o MÉTODO (${metodoReal}) na luta ${luta.redFighter} vs ${luta.blueFighter}`);
+          } else {
+            console.log(`🔴 Usuário ${aposta.idUsuario} ERROU o MÉTODO na luta ${luta.redFighter} vs ${luta.blueFighter}`);
+          }
+  
+          if (aposta.rodada?.toString() === luta.round?.toString()) {
+            pontos += 5;
+            console.log(`🟢 Usuário ${aposta.idUsuario} acertou a RODADA na luta ${luta.redFighter} vs ${luta.blueFighter}`);
+          } else {
+            console.log(`🔴 Usuário ${aposta.idUsuario} ERROU a RODADA na luta ${luta.redFighter} vs ${luta.blueFighter}`);
+          }
+  
+          console.log(`🎯 Total: ${pontos} pontos\n`);
+  
+          if (pontos > 0) {
+            await conexao.promise().execute(
+              'UPDATE usuarios SET pontos = IFNULL(pontos, 0) + ? WHERE idUsuarios = ?',
+              [pontos, aposta.idUsuario]
+            );
+          }
+        }
       }
-
-      const SQLapostas = 'select * from apostasufc';
-      const [rowsDB2] = await conexao.promise().execute(SQLapostas);
-      if (rowsDB2.length > 0) {
-        const evento = rowsDB2[0];
   
-        const idUFC = evento.idUFC;
-        const lutas = JSON.parse(evento.lutas); 
-  
-        console.log({ idUFC, lutas});
-      }
+      // 🆕 4. Limpa eventos e scrapeia novos (evento futuro vira idUFC = 1)
       await conexao.promise().execute('DELETE FROM eventosufc;');
-      await conexao.promise().execute('ALTER TABLE eventosufc AUTO_INCREMENT = 1;');
+      await conexao.promise().execute('ALTER TABLE eventosufc AUTO_INCREMENT = 1');
   
       const eventPageResponse = await axios.get('http://ufcstats.com/statistics/events/completed');
       const $ = cheerio.load(eventPageResponse.data);
@@ -114,16 +177,20 @@ class UFC {
         const $ = cheerio.load(data);
         const fights = [];
         let fightId = 1;
+  
         $('tbody.b-fight-details__table-body > tr').each((i, el) => {
           const tds = $(el).find('td');
-          const fighterNames = tds.eq(1)
-            .find('p.b-fight-details__table-text a')
-            .map((i, e) => $(e).text().trim())
-            .get();
-          const redFighter = fighterNames[0] || '';
-          const blueFighter = fighterNames[1] || '';
+          const fighterNames = tds.eq(1).find('a.b-link_style_black');
+          const redFighter = $(fighterNames[0]).text().trim();
+          const blueFighter = $(fighterNames[1]).text().trim();
+  
+          const winnerTag = tds.eq(0).find('a.b-flag_style_green');
+          const winnerHref = winnerTag.attr('href') || '';
+          const redHref = $(fighterNames[0]).attr('href');
+          const winner = winnerHref === redHref ? 'red' : 'blue';
+  
           const weightClass = tds.eq(6).text().trim();
-          const method = tds.eq(7).text().trim();
+          const method = tds.eq(7).find('p').first().text().trim();
           const round = tds.eq(8).text().trim();
           const time = tds.eq(9).text().trim();
   
@@ -135,61 +202,45 @@ class UFC {
               weightClass,
               method,
               round,
-              time
+              time,
+              winner
             });
           }
         });
+  
         return fights;
       };
   
-      let events = [];
-  
+      const events = [];
       const nextRow = rowsTable.find(row => $(row).find('img[src*="next.png"]').length);
       const nextEvent = nextRow ? extractEvent($, nextRow) : null;
-  
-      const completedRows = rowsTable.filter(row => !$(row).find('img[src*="next.png"]').length);
-      let lastCompletedEvent = null;
-      for (const row of completedRows) {
-        const candidate = extractEvent($, row);
-        if (!candidate) continue;
-        const fights = await scrapeFights(candidate.link);
-        if (fights.length > 0) {
-          lastCompletedEvent = { ...candidate, fights };
-          break;
-        }
-      }
-  
-      if (!lastCompletedEvent && completedRows.length > 0) {
-        const candidate = extractEvent($, completedRows[0]);
-        const fights = await scrapeFights(candidate.link);
-        lastCompletedEvent = { ...candidate, fights };
-      }
   
       if (nextEvent) {
         const fights = await scrapeFights(nextEvent.link);
         events.push({ ...nextEvent, fights });
       }
   
-      if (lastCompletedEvent) {
-        events.push(lastCompletedEvent);
-      }
-  
-      const SQLInsert = 'INSERT INTO eventosufc (evento, data, local, lutas) VALUES (?, ?, ?, ?);';
+      const insertSQL = 'INSERT INTO eventosufc (evento, data, local, lutas) VALUES (?, ?, ?, ?)';
       for (const event of events) {
-        const [result] = await conexao.promise().execute(
-          SQLInsert,
-          [event.name, event.date, event.location, JSON.stringify(event.fights)]
-        );
-        console.log(`Event '${event.name}' inserted with id ${result.insertId}`);
+        const [res] = await conexao.promise().execute(insertSQL, [
+          event.name,
+          event.date,
+          event.location,
+          JSON.stringify(event.fights)
+        ]);
+        console.log(`✅ Novo evento '${event.name}' inserido com ID ${res.insertId}`);
       }
   
-      return events.map(event => event.name);
+      return events.map(e => e.name);
   
     } catch (error) {
-      console.error('Erro ao sync eventos:', error);
+      console.error('Erro no ufc_sync_events:', error);
       return false;
     }
   }
+  
+  
+  
   
   
   get idUFC() {

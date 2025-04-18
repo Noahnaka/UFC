@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Menu Principal | uniBET</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     /* Basic styling for events */
     .event-container {
@@ -39,28 +40,32 @@
     }
   </style>
   <script>
-    function redirectToCriarEvento() {
-      window.location.href = "/CreateEvent";
-    }
-    function redirectToEntrarEvento() {
-      window.location.href = "/JoinEvent";
-    }
-    const info = JSON.parse(localStorage.getItem("informacao"));
-    if (!info || !info.idUsuario) {
-      window.location.href = "/Join";
-    }
+
+      const secretKey = "univap";
+      const encryptedInfo = localStorage.getItem("informacao");
+      let info = null;
+
+      try {
+        const decryptedBytes = CryptoJS.AES.decrypt(encryptedInfo, secretKey);
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        info = JSON.parse(decryptedText);
+      } catch (e) {
+        console.error("Erro ao descriptografar dados do usuário:", e);
+        window.location.href = "/Join"; 
+      }
+
     
 
     function betEvent(eventId) {
-        localStorage.setItem("redirecionamento", eventId);
-        window.location.href = "/ufc/bet";
+      const secretKey = "univap"; 
+      const encryptedId = CryptoJS.AES.encrypt(eventId.toString(), secretKey).toString();
+      localStorage.setItem("redirecionamento", encryptedId);
+      window.location.href = "/ufc/bet";
     }
+
   </script>
 </head>
 <body>
-  <h1>Hello world</h1>
-  <button onclick="redirectToCriarEvento()">Criar evento</button>
-  <button onclick="redirectToEntrarEvento()">Entrar evento</button>
 
   <div id="matchesContainer" style="margin-top:20px;">
     <h2>UFC Matches</h2>

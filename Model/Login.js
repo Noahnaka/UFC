@@ -10,12 +10,11 @@ class Login {
 
     async loginRead() {
         const conexao = Banco.getConexao(); 
-        const SQL = 'SELECT idUsuario FROM Informacao_usuario WHERE email = ? AND senha = MD5(?);'; 
+        const SQL = 'SELECT idUsuarios FROM usuarios WHERE email = ? AND senha = MD5(?);'; 
         try {
             const [rows] = await conexao.promise().execute(SQL, [this._emailLogin, this._senhaLogin]);
-            
             if (rows.length > 0) {
-                return rows[0].idUsuario; 
+                return rows[0].idUsuarios; 
             } else {
                 return null;
             }

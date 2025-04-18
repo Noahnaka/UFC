@@ -8,7 +8,7 @@ module.exports = class roteadorLogin {
     }
 
     criarRotasLogin() {
-        this._router.get('/',
+        this._router.post('/',
             this._loginControle.login_read
         )
 

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="images/icon.png" type="image/x-icon">
     <title>Bem-vindo | uniBET</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <link rel="stylesheet" href="css/login.css">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 	<script>
@@ -56,9 +57,9 @@
   
 </body>
 <script>
-	const info = JSON.parse(localStorage.getItem("informacao"));
+	const info = localStorage.getItem("informacao");
 
-	if (info && info.idUsuario) {
+	if (info) {
 		window.location.href = "/Main";
 	} 
 
@@ -123,8 +124,9 @@
 		   lblReposta.style.color = "red"; 
 		   divResposta.appendChild(lblReposta);
 		}else{
-			localStorage.setItem("informacao",texto_json);
-			window.location.href = "/Main";
+			const secretKey = "univap";
+			const encryptedInfo = CryptoJS.AES.encrypt(texto_json, secretKey).toString();
+			localStorage.setItem("informacao", encryptedInfo);
 		}
 	}
 	}
@@ -137,7 +139,7 @@
 		const senha = txtSenha.value;
 
 		const obj_json = {
-			logins: {
+			data: {
 				email: email,
 				senha: senha
 			}
@@ -145,6 +147,9 @@
 		const uri = '/Login';
 		fetch(uri, {
 			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
 			body: JSON.stringify(obj_json)
 		}).then((resposta_backEnd)=>{
 			return resposta_backEnd.text();
@@ -165,7 +170,9 @@
 		   lblReposta.style.color = "red"; 
 		   divLogin.appendChild(lblReposta);
 		}else{
-			localStorage.setItem("informacao",texto_json);
+			const secretKey = "univap";
+			const encryptedInfo = CryptoJS.AES.encrypt(texto_json, secretKey).toString();
+			localStorage.setItem("informacao", encryptedInfo);
 			window.location.href = "/Main";
 		}
 	}

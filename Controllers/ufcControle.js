@@ -52,7 +52,6 @@ module.exports = class ufcControle {
     
     async ufc_create_bet(request,response) {
         const { idUsuario, eventID, FightID, winner, round, method } = request.body;
-        console.log(request.body);
         var ufc = new UFC();
         ufc.idUsuario = idUsuario;
         ufc.idUFC = eventID;
