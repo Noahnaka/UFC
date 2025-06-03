@@ -24,7 +24,7 @@ module.exports = class UFCController {
     ufc_get_events_by_id = async (req, res) => {
         try {
             const ufc = new UFC();
-            ufc.idUFC = req.query.idUFC;
+            ufc.id_evento = req.query.id_evento;
 
             const resultado = await ufc.UFC_read_by_id();
 
@@ -69,7 +69,7 @@ module.exports = class UFCController {
 
             const ufc = new UFC();
             ufc.idUsuario = id_cliente;    
-            ufc.idUFC = id_evento;
+            ufc.id_evento = id_evento;
             ufc.idEvento = id_luta;
             ufc.vencedor = vencedor;
             ufc.rodada = rodada;

@@ -5,54 +5,69 @@ const JWTMiddleware = require('../middleware/JWTMiddleware');
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *       description: JWT token com duração de 100 anos. Formato: Bearer <token>
  *   schemas:
  *     LoginRequest:
  *       type: object
  *       required:
- *         - email_conta_cliente
- *         - senha_conta_cliente
+ *         - email_cliente
+ *         - senha_cliente
  *       properties:
- *         email_conta_cliente:
+ *         email_cliente:
  *           type: string
  *           format: email
  *           description: Email do cliente
- *         senha_conta_cliente:
+ *         senha_cliente:
  *           type: string
  *           description: Senha do cliente
+ *     LoginResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: boolean
+ *           description: Status da operação
+ *         message:
+ *           type: string
+ *           description: Mensagem de retorno
+ *         token:
+ *           type: string
+ *           description: JWT token com duração de 100 anos
+ *         data:
+ *           type: object
+ *           properties:
+ *             nome_cliente:
+ *               type: string
+ *               description: Nome do cliente
+ *             email_cliente:
+ *               type: string
+ *               description: Email do cliente
+ *             celular_cliente:
+ *               type: string
+ *               description: Celular do cliente
  *     ClienteRequest:
  *       type: object
  *       required:
- *         - nome_conta_cliente
- *         - sobrenome_conta_cliente
- *         - email_conta_cliente
- *         - senha_conta_cliente
- *         - cpf_conta_cliente
- *         - telefone_conta_cliente
- *         - celular_conta_cliente
+ *         - nome_cliente
+ *         - email_cliente
+ *         - senha_cliente
+ *         - celular_cliente
  *       properties:
- *         nome_conta_cliente:
+ *         nome_cliente:
  *           type: string
  *           description: Nome do cliente
- *         sobrenome_conta_cliente:
- *           type: string
- *           description: Sobrenome do cliente
- *         email_conta_cliente:
+ *         email_cliente:
  *           type: string
  *           format: email
  *           description: Email do cliente
- *         senha_conta_cliente:
+ *         senha_cliente:
  *           type: string
  *           description: Senha do cliente
- *         cpf_conta_cliente:
- *           type: string
- *           description: CPF do cliente
- *         cnpj_conta_cliente:
- *           type: string
- *           description: CNPJ do cliente (opcional)
- *         telefone_conta_cliente:
- *           type: string
- *           description: Telefone fixo do cliente
- *         celular_conta_cliente:
+ *         celular_cliente:
  *           type: string
  *           description: Celular do cliente
  */
@@ -68,9 +83,10 @@ module.exports = class ClienteRouter {
     criarRotas = () => {
         /**
          * @swagger
-         * /api/conta/cliente:
+         * /api/cliente:
          *   get:
          *     summary: Lista todas as contas de cliente
+         *     description: Retorna uma lista de todos os clientes cadastrados
          *     tags: [Cliente]
          *     security:
          *       - bearerAuth: []
@@ -90,41 +106,13 @@ module.exports = class ClienteRouter {
             this._clienteController.getAllCliente
         );
 
-        this._router.get('/:id_cliente',
-            this._clienteController.getClienteById
-        );
-
-        this._router.post('/cadastro',
-            this._clienteMiddleware.validateNome,
-            this._clienteMiddleware.validateEmail,
-            this._clienteMiddleware.validate_Email,
-            this._clienteMiddleware.checkDuplicateEmail,
-            this._clienteMiddleware.validateSenha,
-            this._clienteMiddleware.validateCelular,
-            this._clienteController.createCliente
-        );
-
-        this._router.post('/login', 
-            this._clienteMiddleware.validateEmail,
-            this._clienteMiddleware.validateSenha,
-            this._clienteController.loginCliente
-        );
-
-      //  this._router.put('/status/:id_cliente',
-      //      this._clienteController.atualizarStatus
-      //  );
-
-     //   this._router.delete('/:id_cliente',
-        //    this._clienteController.deleteCliente
-       // );
         /**
          * @swagger
-         * /api/conta/cliente/{id_cliente}:
+         * /api/cliente/{id_cliente}:
          *   get:
-         *     summary: Busca uma conta de cliente por ID
+         *     summary: Busca um cliente por ID
+         *     description: Retorna os detalhes de um cliente específico
          *     tags: [Cliente]
-         *     security:
-         *       - bearerAuth: []
          *     parameters:
          *       - in: path
          *         name: id_cliente
@@ -139,68 +127,19 @@ module.exports = class ClienteRouter {
          *           application/json:
          *             schema:
          *               $ref: '#/components/schemas/ClienteRequest'
-         *       401:
-         *         description: Token inválido ou expirado
          *       404:
          *         description: Cliente não encontrado
          */
-
-
-        /**
-         * @swagger
-         * /api/conta/cliente/status/{id_cliente}:
-         *   put:
-         *     summary: Atualiza o status de uma conta de cliente
-         *     tags: [Cliente]
-         *     security:
-         *       - bearerAuth: []
-         *     parameters:
-         *       - in: path
-         *         name: id_cliente
-         *         required: true
-         *         schema:
-         *           type: integer
-         *         description: ID do cliente
-         *     responses:
-         *       200:
-         *         description: Status do cliente atualizado com sucesso
-         *       401:
-         *         description: Token inválido ou expirado
-         *       404:
-         *         description: Cliente não encontrado
-         */
-
+        this._router.get('/:id_cliente',
+            this._clienteController.getClienteById
+        );
 
         /**
          * @swagger
-         * /api/conta/cliente/{id_cliente}:
-         *   delete:
-         *     summary: Deleta uma conta de cliente
-         *     tags: [Cliente]
-         *     security:
-         *       - bearerAuth: []
-         *     parameters:
-         *       - in: path
-         *         name: id_cliente
-         *         required: true
-         *         schema:
-         *           type: integer
-         *         description: ID do cliente
-         *     responses:
-         *       200:
-         *         description: Cliente deletado com sucesso
-         *       401:
-         *         description: Token inválido ou expirado
-         *       404:
-         *         description: Cliente não encontrado
-         */
-
-
-        /**
-         * @swagger
-         * /api/conta/cliente:
+         * /api/cliente/cadastro:
          *   post:
          *     summary: Cria uma nova conta de cliente
+         *     description: Cria um novo cliente e retorna um token JWT com duração de 100 anos
          *     tags: [Cliente]
          *     requestBody:
          *       required: true
@@ -211,51 +150,56 @@ module.exports = class ClienteRouter {
          *     responses:
          *       201:
          *         description: Cliente criado com sucesso
+         *         content:
+         *           application/json:
+         *             schema:
+         *               $ref: '#/components/schemas/LoginResponse'
          *       400:
          *         description: Dados inválidos
          *       409:
          *         description: Email já cadastrado
          */
-
-
-        /*
-        this._router.get('/',
-            this._jwtMiddleware.validateToken,
-            this._adminController.getAllAdmins
+        this._router.post('/cadastro',
+            this._clienteMiddleware.validateNome,
+            this._clienteMiddleware.validateEmail,
+            this._clienteMiddleware.validate_Email,
+            this._clienteMiddleware.checkDuplicateEmail,
+            this._clienteMiddleware.validateSenha,
+            this._clienteMiddleware.validateCelular,
+            this._clienteController.createCliente
         );
 
-        this._router.get('/:id',
-            this._jwtMiddleware.validateToken,
-            this._adminController.getAdminById
+        /**
+         * @swagger
+         * /api/cliente/login:
+         *   post:
+         *     summary: Realiza login do cliente
+         *     description: Autentica o cliente e retorna um token JWT com duração de 100 anos
+         *     tags: [Cliente]
+         *     requestBody:
+         *       required: true
+         *       content:
+         *         application/json:
+         *           schema:
+         *             $ref: '#/components/schemas/LoginRequest'
+         *     responses:
+         *       200:
+         *         description: Login realizado com sucesso
+         *         content:
+         *           application/json:
+         *             schema:
+         *               $ref: '#/components/schemas/LoginResponse'
+         *       401:
+         *         description: Credenciais inválidas
+         */
+        this._router.post('/login', 
+            this._clienteMiddleware.validateEmail,
+            this._clienteMiddleware.validateSenha,
+            this._clienteController.loginCliente
         );
-
-        this._router.patch('/:id',
-            this._jwtMiddleware.validateToken,
-            this._adminController.patchAdmin
-        );
-
-        this._router.put('/:id',
-            this._jwtMiddleware.validateToken,
-            this._adminMiddleware.validateName,
-            this._adminMiddleware.validateEmail,
-            this._adminMiddleware.validatePassword,
-            this._funcionarioMiddleware.checkDuplicateEmail,
-            this._fornecedorMiddleware.checkDuplicateEmail,
-            this._adminMiddleware.validate_Email,
-            this._adminMiddleware.validate_Password,
-            this._adminController.updateAdmin
-        );
-
-        this._router.delete('/:id',
-            this._jwtMiddleware.validateToken,
-           this._adminController.deleteAdmin
-        );
-        */
 
         return this._router;
     };
-
-    //getters e setters
 
     get router() {
         return this._router;

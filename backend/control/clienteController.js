@@ -42,7 +42,7 @@ module.exports = class ClienteController {
         } catch (err) {
             res.status(401).json({
                 status: false,
-                message: 'Credenciais inválidas',
+                message: 'Email ou senha inválidos',
                 error: err.message,
             });
         }

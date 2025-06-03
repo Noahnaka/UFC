@@ -13,7 +13,8 @@ module.exports = class MeuTokenJWT {
         this._iss = 'http://localhost';
         this._aud = 'http://localhost';
         this._sub = "acesso_sistema";
-        this._duracaoToken = 3600 * 24; 
+        // 100 years in seconds (3600 * 24 * 365 * 100)
+        this._duracaoToken = 3153600000;
     }
 
     //generates

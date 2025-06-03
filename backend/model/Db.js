@@ -1,42 +1,43 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+const mysql = require('mysql2');
 
-let pool = null;
+class Banco {
+    static HOST = process.env.DB_HOST;
+    static USER = process.env.DB_USER;
+    static PWD = process.env.DB_PASSWORD;
+    static DB = process.env.DB_NAME;
+    static PORT = process.env.DB_PORT;
+    static CONEXAO = null;
 
-const config = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME
-};
+    static conectar() {
+        if (Banco.CONEXAO === null) {
+            Banco.CONEXAO = mysql.createConnection({
+                host: Banco.HOST,
+                user: Banco.USER,
+                password: Banco.PWD,
+                database: Banco.DB,
+                port: Banco.PORT
+            });
 
-async function connectToDatabase() {
-    if (pool) return pool;
+            Banco.CONEXAO.connect((err) => {
+                if (err) {
+                    const objResposta = {
+                        cod: 1,
+                        msg: "Erro ao conectar no banco",
+                        erro: err.message
+                    };
+                    console.error(JSON.stringify(objResposta));
+                    process.exit(1); 
+                }
+            });
+        }
+    }
 
-    try {
-        
-        pool = new Pool(config);
-        // Testa a conexão
-        await pool.query('SELECT NOW()');
-        return pool;
-    } catch (err) {
-        console.error('Erro ao conectar ao PostgreSQL:', err);
-        console.error('Database configuration:', {
-            user: config.user,
-            host: config.host,
-            port: config.port,
-            database: config.database
-        });
-        throw new Error('Erro ao conectar ao PostgreSQL');
+    static getConexao() {
+        if (Banco.CONEXAO === null) {
+            Banco.conectar();
+        }
+        return Banco.CONEXAO;
     }
 }
 
-function getDatabase() {
-    if (!pool) {
-        throw new Error('Banco de dados não conectado!');
-    }
-    return pool;
-}
-
-module.exports = { connectToDatabase, getDatabase };
+module.exports = Banco;

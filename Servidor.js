@@ -6,7 +6,7 @@ const cors = require('cors');
 const ClienteRouter = require("./backend/router/2_clienteRouter");
 const UfcRouter = require("./backend/router/3_ufcRouter");
 
-const { connectToDatabase } = require('./backend/model/Db');  
+const { getConexao } = require('./backend/model/Db');  
 
 const swaggerOptions = {
     definition: {
@@ -31,7 +31,7 @@ class Servidor {
         this._porta = process.env.PORT;
         this._app = express();
         this._app.use(cors({
-            origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'https://techfala2.sanjaworks.com.br'],
+            origin: ['http://localhost:3000', 'http://localhost:8080', 'https://univapbet.shop'],
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization'],
             credentials: true,
@@ -55,7 +55,7 @@ class Servidor {
 
     iniciar = async () => {
         try {
-            await connectToDatabase();
+            await getConexao();
             
             this._app.listen(this._porta, () => {
                 console.log(`Server running at http://localhost:${this._porta}/`);
@@ -68,7 +68,6 @@ class Servidor {
     }
 }
 
-// Create and start server instance
 const servidor = new Servidor();
 servidor.iniciar();
  

@@ -1,8 +1,6 @@
-CREATE DATABASE unibet;
+CREATE SCHEMA unibet;
 
-CREATE SCHEMA unibetv2;
-
-CREATE TABLE unibetv2.tbl_cliente (
+CREATE TABLE unibet.tbl_cliente (
     id_cliente SERIAL PRIMARY KEY,
     nome_cliente TEXT NOT NULL,
     email_cliente TEXT NOT NULL,
@@ -12,7 +10,7 @@ CREATE TABLE unibetv2.tbl_cliente (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE unibetv2.tbl_apostas_ufc (
+CREATE TABLE unibet.tbl_apostas_ufc (
     id_aposta SERIAL PRIMARY KEY,
     id_cliente INTEGER NOT NULL,
     id_ufc INTEGER NOT NULL,
@@ -23,7 +21,7 @@ CREATE TABLE unibetv2.tbl_apostas_ufc (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE unibetv2.tbl_eventos_ufc (
+CREATE TABLE unibet.tbl_eventos_ufc (
     id_evento SERIAL PRIMARY KEY,
     nome_evento TEXT NOT NULL,
     local_evento TEXT NOT NULL,
