@@ -3,6 +3,7 @@ require('dotenv').config();
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
 const cors = require('cors');
+const TokenRouter = require("./backend/router/1_tokenRouter");
 const ClienteRouter = require("./backend/router/2_clienteRouter");
 const UfcRouter = require("./backend/router/3_ufcRouter");
 
@@ -42,6 +43,7 @@ class Servidor {
         
         this._clienteRouter = new ClienteRouter();
         this._ufcRouter = new UfcRouter();
+        this._tokenRouter = new TokenRouter();
         this.configurarRotas();
     }
 
@@ -51,6 +53,7 @@ class Servidor {
         
         this._app.use("/api/cliente", this._clienteRouter.criarRotas());
         this._app.use("/api/ufc", this._ufcRouter.criarRotas());
+        this._app.use("/api/token", this._tokenRouter.criarRotas());
     }
 
     iniciar = async () => {

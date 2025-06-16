@@ -118,6 +118,10 @@ module.exports = class UfcRouter {
             this._ufcController.ufc_get_events
         )
 
+        this._router.get('/payload',
+            this._ufcController.ufc_get_payload
+        )
+
         /**
          * @swagger
          * /api/ufc/eventos/bet:

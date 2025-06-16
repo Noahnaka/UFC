@@ -17,7 +17,6 @@ CREATE TABLE unibet.tbl_apostas_ufc (
     id_evento INTEGER NOT NULL,
     id_luta INTEGER NOT NULL,
     id_vencedor INTEGER NOT NULL,
-    valor_aposta DECIMAL(10, 2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -5,6 +5,21 @@ const cheerio = require('cheerio');
 
 class UfcDAO extends UfcModel {
 
+    UFC_get_payload = async () => {
+        const pool = getConexao();
+        try{
+            const [usuarios] = await pool.promise().execute('SELECT COUNT(*) as total FROM unibet.tbl_cliente');
+            const [apostas] = await pool.promise().execute('SELECT COUNT(*) as total FROM unibet.tbl_apostas_ufc');
+            
+            return {
+                total_usuarios: usuarios[0].total,
+                total_apostas: apostas[0].total
+            };
+        }catch (err) {
+            throw new Error('Erro ao buscar apostas UFC');
+        }
+    }
+
     UFC_read_all = async () => {
         const pool = getConexao();
         try {

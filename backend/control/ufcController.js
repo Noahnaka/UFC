@@ -118,6 +118,26 @@ module.exports = class UFCController {
         }
     };
 
+    ufc_get_payload = async (req, res) => {
+        try {
+            const ufc = new UFC();
+
+            const resultado = await ufc.UFC_get_payload();
+
+        res.status(200).json({
+            status: true,
+            message: 'Payload encontrada',
+            data: resultado,
+        });
+        } catch (err) {
+            res.status(400).json({
+                status: false,
+                message: 'Erro ao buscar payload',
+                error: err.message,
+            });
+        }
+    };
+
     /*
 
     getAllAdmins = async (req, res) => {
