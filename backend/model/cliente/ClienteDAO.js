@@ -54,7 +54,12 @@ class ClienteDAO extends ClienteModel {
                 hashedPassword,
                 this._celular_cliente,
             ]);
-            return result.affectedRows > 0;
+            
+            if (result.affectedRows > 0) {
+                this._id_cliente = result.insertId;
+                return true;
+            }
+            return false;
         } catch (err) {
             throw new Error('Erro ao criar cliente: ' + err);
         }

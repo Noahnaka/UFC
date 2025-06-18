@@ -30,6 +30,98 @@ class UfcDAO extends UfcModel {
         }
     };
 
+    update_fight = async() => {
+        const pool = getConexao();
+        
+        const query = `
+            UPDATE unibet.tbl_lutas_ufc 
+            SET red_fighter = ?, blue_fighter = ?, categoria = ?, titulo = ?
+            WHERE id_luta = ?
+        `;
+        
+        try {
+            const [result] = await pool.promise().execute(query, [
+                this._red_fighter,
+                this._blue_fighter,
+                this._categoria,
+                this._titulo,
+                this._id_luta
+            ]);
+            return result.affectedRows > 0;
+        } catch (err) {
+            throw new Error('Erro ao atualizar luta: ' + err);
+        }
+    };
+
+    delete_evento = async() => { 
+        const pool = getConexao();
+        
+        const query = `
+            DELETE from unibet.tbl_eventos_ufc WHERE id_evento = ?
+        `;
+        
+        try {
+            const [result] = await pool.promise().execute(query, [
+                this._id_evento
+            ]);
+            return result.affectedRows > 0;
+        } catch (err) {
+            throw new Error('Erro ao atualizar evento: ' + err);
+        }
+    };
+
+    delete_fight = async() => { 
+        const pool = getConexao();
+        
+        const query = `
+            DELETE from unibet.tbl_lutas_ufc WHERE id_luta = ?
+        `;
+        
+        try {
+            const [result] = await pool.promise().execute(query, [
+                this._id_luta
+            ]);
+            return result.affectedRows > 0;
+        } catch (err) {
+            throw new Error('Erro ao atualizar luta: ' + err);
+        }
+    };
+
+    update_event_status = async(id_evento) => {
+        const pool = getConexao();
+        
+        const query = `
+            UPDATE unibet.tbl_eventos_ufc 
+            SET status_evento = !status_evento
+            WHERE id_evento = ?
+        `;
+        
+        try {
+            const [result] = await pool.promise().execute(query, [
+                id_evento
+            ]);
+            return result.affectedRows > 0;
+        } catch (err) {
+            throw new Error('Erro ao atualizar status evento: ' + err);
+        }
+    };
+
+    UFC_read_fights_by_id = async (id_evento) => {
+        const pool = getConexao();
+
+        if (!id_evento) {
+            throw new Error('O campo id_evento é obrigatório');
+        }
+    
+        try {
+            const query = `SELECT * FROM unibet.tbl_lutas_ufc WHERE id_evento = ?`;
+            const [rows] = await await pool.promise().execute(query, [id_evento]);
+            return rows; 
+        } catch (err) {
+            throw new Error('Erro ao buscar lutas: ' + err.message);
+        }
+    };
+
     static UFC_read_by_id = async (id_ufc) => {
         const pool = getConexao();
 
@@ -63,7 +155,7 @@ class UfcDAO extends UfcModel {
         VALUES (?, ?, ?, ?, ?, ?)
         `;
         try {
-            const [result] = await pool.query(query, [
+            const [result] = await pool.promise().execute(query, [
                 this._idUsuario,
                 this._id_evento,
                 this._idEvento,
@@ -76,6 +168,34 @@ class UfcDAO extends UfcModel {
             throw new Error('Erro ao criar aposta: ' + err);
         }
     };
+
+    ufc_create_fight = async () => {
+        const pool = getConexao();
+        const query = `
+        INSERT INTO unibet.tbl_lutas_ufc (id_evento, red_fighter, blue_fighter, categoria, titulo)
+        VALUES (?, ?, ?, ?, ?)
+        `;
+        try {
+            const [result] = await pool.promise().execute(query, [this._id_evento, this._red_fighter, this._blue_fighter, this.categoria, this._titulo]);   
+            return result.affectedRows > 0;
+        } catch (err) {
+            throw new Error('Erro ao criar luta: ' + err);
+        }
+    }
+
+    ufc_create_event = async () => {
+        const pool = getConexao();
+        const query = `
+        INSERT INTO unibet.tbl_eventos_ufc (nome_evento, local_evento, data_evento)
+        VALUES (?, ?, ?)
+        `;
+        try {
+            const [result] = await pool.promise().execute(query, [this._nome_evento, this._local_evento, this._data_evento]);   
+            return result.affectedRows > 0;
+        } catch (err) {
+            throw new Error('Erro ao criar evento: ' + err);
+        }
+    }
 
     ufc_sync_events = async () => {
         const pool = getConexao();

@@ -5,7 +5,7 @@ module.exports = class TokenController {
         try {
             const jwt = new TokenJWT();
 
-            jwt.validar_token_conta_cliente(req.headers['authorization']);
+            jwt.validar_token_cliente(req.headers['authorization']);
             const payload = await jwt.getPayload();
 
             if (payload) {

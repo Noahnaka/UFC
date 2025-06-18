@@ -87,7 +87,7 @@ module.exports = class TokenRouter {
          *         description: Token inválido ou expirado
          */
         this._router.get('/conta/cliente', 
-            this._jwtMiddleware.validate_token_conta_cliente,
+            this._jwtMiddleware.validate_token_cliente,
             this._tokenController.getPayloadTokenContaCliente
         );        
 

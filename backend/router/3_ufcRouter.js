@@ -118,6 +118,26 @@ module.exports = class UfcRouter {
             this._ufcController.ufc_get_events
         )
 
+        this._router.get('/fights/:id_evento',
+            this._ufcController.ufc_get_fights_by_id
+        )
+
+        this._router.put('/update/fight/:id_luta',
+            this._ufcController.ufc_update_fight_by_id
+        )
+
+        this._router.put('/event/status/:id_evento',
+            this._ufcController.ufc_update_status
+        )
+
+        this._router.delete('/delete/evento/:id_evento',
+            this._ufcController.ufc_delete_evento_by_id
+        )
+
+        this._router.delete('/delete/fight/:id_luta',
+            this._ufcController.ufc_delete_fight_by_id
+        )
+
         this._router.get('/payload',
             this._ufcController.ufc_get_payload
         )
@@ -203,6 +223,14 @@ module.exports = class UfcRouter {
          */
         this._router.post('/sync',
             this._ufcController.ufc_sync_events
+        )
+
+        this._router.post('/create/event',
+            this._ufcController.ufc_create_event
+        )
+
+        this._router.post('/create/fight',
+            this._ufcController.ufc_create_fight
         )
 
         /**

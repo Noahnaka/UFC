@@ -6,6 +6,7 @@ const cors = require('cors');
 const TokenRouter = require("./backend/router/1_tokenRouter");
 const ClienteRouter = require("./backend/router/2_clienteRouter");
 const UfcRouter = require("./backend/router/3_ufcRouter");
+const AdminRouter = require("./backend/router/4_adminRouter");
 
 const { getConexao } = require('./backend/model/Db');  
 
@@ -43,6 +44,7 @@ class Servidor {
         
         this._clienteRouter = new ClienteRouter();
         this._ufcRouter = new UfcRouter();
+        this._adminRouter = new AdminRouter();
         this._tokenRouter = new TokenRouter();
         this.configurarRotas();
     }
@@ -54,6 +56,7 @@ class Servidor {
         this._app.use("/api/cliente", this._clienteRouter.criarRotas());
         this._app.use("/api/ufc", this._ufcRouter.criarRotas());
         this._app.use("/api/token", this._tokenRouter.criarRotas());
+        this._app.use("/api/admin", this._adminRouter.criarRotas());
     }
 
     iniciar = async () => {

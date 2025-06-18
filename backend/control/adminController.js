@@ -1,42 +1,36 @@
-const Cliente = require('../model/cliente/Cliente');
+const Admin = require('../model/admin/Admin');
 const TokenJWT = require('../model/TokenJWT');
 
-module.exports = class ClienteController {
-    loginCliente = async (req, res) => {
+module.exports = class AdminController {
+    loginAdmin = async (req, res) => {
         try {
-            const { email_cliente, senha_cliente } = req.body;
+            const { email_admin, senha_admin } = req.body;
 
-            const cliente = new Cliente();
-            cliente.email_cliente = email_cliente;
-            cliente.senha_cliente = senha_cliente;
+            const admin = new Admin();
+            admin.email_admin = email_admin;
+            admin.senha_admin = senha_admin;
 
-            const success = await cliente.login();
+            const success = await admin.login();
 
             if (success) {
                 const jwt = new TokenJWT();
-                const token = jwt.gerar_token_cliente({
-                    id_cliente: cliente.id_cliente,
-                    nome_cliente: cliente.nome_cliente,
-                    sobrenome_cliente: cliente.sobrenome_cliente,
-                    email_cliente: cliente.email_cliente,
-                    celular_cliente: cliente.celular_cliente
+                const token = jwt.gerar_token_admin({
+                    id_admin: admin.id_admin,
+                    email_admin: admin.email_admin,
                 });
 
                 res.status(200).json({
                     status: true,
-                    message: 'Cliente logado com sucesso',
+                    message: 'Admin logado com sucesso',
                     token: token,
                     data: {
-                        nome_cliente: cliente.nome_cliente,
-                        sobrenome_cliente: cliente.sobrenome_cliente,
-                        email_cliente: cliente.email_cliente,
-                        celular_cliente: cliente.celular_cliente
+                        email_admin: admin.email_admin,
                     }
                 });
             } else {
                 res.status(400).json({
                     status: false,
-                    message: 'Falha ao logar cliente',
+                    message: 'Falha ao logar admin',
                 });
             }
         } catch (err) {
@@ -47,92 +41,44 @@ module.exports = class ClienteController {
             });
         }
     };
-    
-    getAllCliente = async (req, res) => {
+
+
+    createAdmin = async (req, res) => {
         try {
-            const cliente = await Cliente.getAll();
+            const { email_admin, senha_admin } = req.body;
 
-            res.status(200).json({
-                status: true,
-                message: 'Get all cliente realizado com sucesso',
-                data: cliente,
-            });
-        } catch (err) {
-            res.status(500).json({
-                status: false,
-                message: 'Erro ao buscar cliente',
-                error: err.message,
-            });
-        }
-    };
+            const admin = new Admin();
+            admin.email_admin = email_admin;
+            admin.senha_admin = senha_admin;
 
-    getClienteById = async (req, res) => {
-        try {
-            const cliente = await Cliente.getById(req.params.id_cliente);
-
-            if (!cliente) {
-                return res.status(404).json({
-                    status: false,
-                    message: 'Cliente não encontrado',
-                });
-            }
-
-            res.status(200).json({
-                status: true,
-                message: 'Cliente recuperado com sucesso',
-                data: cliente,
-            });
-        } catch (err) {
-            res.status(404).json({
-                status: false,
-                message: 'Erro ao buscar cliente',
-                error: err.message,
-            });
-        }
-    };
-
-    createCliente = async (req, res) => {
-        try {
-            const { nome_cliente, email_cliente, senha_cliente, celular_cliente } = req.body;
-
-            const cliente = new Cliente();
-            cliente.nome_cliente = nome_cliente;    
-            cliente.email_cliente = email_cliente;
-            cliente.senha_cliente = senha_cliente;
-            cliente.celular_cliente = celular_cliente;
-
-            const success = await cliente.create();
+            const success = await admin.create();
 
             if (success) {
                 const jwt = new TokenJWT();
                 
-                const token = jwt.gerar_token_cliente({
-                    id_cliente: cliente.id_cliente,
-                    nome_cliente: cliente.nome_cliente,
-                    email_cliente: cliente.email_cliente,
-                    celular_cliente: cliente.celular_cliente
+                const token = jwt.gerar_token_admin({
+                    id_admin: admin.id_admin,
+                    email_admin: admin.email_admin,
                 });
 
                 res.status(201).json({
                     status: true,
-                    message: 'Cliente criado com sucesso',
+                    message: 'Admin criado com sucesso',
                     token: token,
                     data: {
-                        nome_cliente: cliente.nome_cliente,
-                        email_cliente: cliente.email_cliente,
-                        celular_cliente: cliente.celular_cliente
+                        email_admin: admin.email_admin,
                     }
                 });
             } else {
                 res.status(400).json({
                     status: false,
-                    message: 'Falha ao criar cliente',
+                    message: 'Falha ao criar admin',
                 });
             }
         } catch (err) {
             res.status(400).json({
                 status: false,
-                message: 'Erro ao criar cliente',
+                message: 'Erro ao criar admin',
                 error: err.message,
             });
         }

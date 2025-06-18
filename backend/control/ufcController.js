@@ -20,6 +20,138 @@ module.exports = class UFCController {
             });
         }
     };
+
+    ufc_delete_evento_by_id = async (req, res) => {
+        try {
+            const ufc = new UFC();
+            ufc.id_evento = req.params.id_evento;
+
+            const success = await ufc.delete_evento();
+
+            res.status(success ? 200 : 400).json({
+                status: success,
+                message: success
+                    ? 'Evento deletado com sucesso'
+                    : 'Falha ao deletar evento',
+            });
+        } catch (err) {
+            res.status(404).json({
+                status: false,
+                message: 'Erro ao deletar evento',
+                error: err.message,
+            });
+        }
+    };
+
+    ufc_delete_fight_by_id = async (req, res) => {
+        try {
+            const ufc = new UFC();
+            ufc.id_luta = req.params.id_luta;
+
+            const success = await ufc.delete_fight();
+
+            res.status(success ? 200 : 400).json({
+                status: success,
+                message: success
+                    ? 'Luta deletado com sucesso'
+                    : 'Falha ao deletar luta',
+            });
+        } catch (err) {
+            res.status(404).json({
+                status: false,
+                message: 'Erro ao deletar luta',
+                error: err.message,
+            });
+        }
+    };
+
+    ufc_update_status = async(req, res) => {
+        try {
+            const ufc = new UFC();
+
+            const success = await ufc.update_event_status(req.params.id_evento);
+
+            if (success) {
+                res.status(200).json({
+                    status: true,
+                    message: 'Status evento atualizada com sucesso',
+                });
+            } else {
+                res.status(200).json({
+                    status: false,
+                    message: 'Nenhuma alteração foi feita, os dados são iguais.',
+                });
+            }
+            
+        } catch (err) {
+            res.status(400).json({
+                status: false,
+                message: 'Erro ao atualizar luta',
+                error: err.message,
+            });
+        }
+    };
+
+    ufc_update_fight_by_id = async(req, res) => {
+        try {
+            const { red_fighter, blue_fighter, categoria, titulo } = req.body;
+
+            const ufc = new UFC();
+            ufc.id_luta = req.params.id_luta;
+            ufc.red_fighter = red_fighter;
+            ufc.blue_fighter = blue_fighter;
+            ufc.categoria = categoria;
+            ufc.titulo = titulo;
+
+            const success = await ufc.update_fight();
+
+            if (success) {
+                res.status(200).json({
+                    status: true,
+                    message: 'Luta atualizada com sucesso',
+                    data: {
+                        id_luta: ufc.id_luta,
+                        red_fighter: ufc.red_fighter,
+                        blue_fighter: ufc.blue_fighter,
+                        categoria: ufc.categoria,
+                        titulo: ufc.titulo
+                    },
+                });
+            } else {
+                res.status(200).json({
+                    status: false,
+                    message: 'Nenhuma alteração foi feita, os dados são iguais.',
+                });
+            }
+            
+        } catch (err) {
+            res.status(400).json({
+                status: false,
+                message: 'Erro ao atualizar luta',
+                error: err.message,
+            });
+        }
+    };
+
+    ufc_get_fights_by_id = async(req, res) => {
+        try {
+            const ufc = new UFC();
+
+            const resultado = await ufc.UFC_read_fights_by_id(req.params.id_evento);
+
+            res.status(200).json({
+                status: true,
+                message: 'Lutas encontradas',
+                data: resultado,
+            });
+        } catch (err) {
+            res.status(500).json({
+                status: false,
+                message: 'Erro ao buscar lutas',
+                error: err.message,
+            });
+        }
+    };
     
     ufc_get_events_by_id = async (req, res) => {
         try {
@@ -61,12 +193,76 @@ module.exports = class UFCController {
                 error: err.message,
             });
         }
+    };    
+
+    ufc_create_event = async (req, res) => {
+        try {
+            const { nome_evento, local_evento, data_evento } = req.body;
+            
+            const ufc = new UFC();
+            ufc.nome_evento = nome_evento;
+            ufc.local_evento = local_evento;
+            ufc.data_evento = data_evento;
+
+            const success = await ufc.ufc_create_event();
+
+            if (success) {
+                res.status(201).json({
+                    status: true,
+                    message: 'Evento criado com sucesso',
+                });
+            } else {
+                res.status(400).json({
+                    status: false,
+                    message: 'Erro ao criar evento',
+                });
+            }
+        } catch (err) {
+            res.status(400).json({
+                status: false,
+                message: 'Erro ao criar evento',
+                error: err.message,
+            });
+        }
+    };
+
+    ufc_create_fight = async (req, res) => {
+        try {
+            const { id_evento, red_fighter, blue_fighter, categoria, titulo } = req.body;
+            
+            const ufc = new UFC();
+            ufc.id_evento = id_evento;
+            ufc.red_fighter = red_fighter;
+            ufc.blue_fighter = blue_fighter;
+            ufc.categoria = categoria;
+            ufc.titulo = titulo;
+
+            const success = await ufc.ufc_create_fight();
+
+            if (success) {
+                res.status(201).json({
+                    status: true,
+                    message: 'Luta criado com sucesso',
+                });
+            } else {
+                res.status(400).json({
+                    status: false,
+                    message: 'Erro ao criar luta',
+                });
+            }
+        } catch (err) {
+            res.status(400).json({
+                status: false,
+                message: 'Erro ao criar luta',
+                error: err.message,
+            });
+        }
     };
 
     ufc_create_bet = async (req, res) => {
         try {
             const { id_cliente, id_evento, id_luta, vencedor, rodada, metodo } = req.body;
-
+            console.log(req.body);
             const ufc = new UFC();
             ufc.idUsuario = id_cliente;    
             ufc.id_evento = id_evento;
