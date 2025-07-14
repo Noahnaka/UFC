@@ -209,6 +209,10 @@ module.exports = class UfcRouter {
             this._ufcController.ufc_create_bet
         )
 
+        this._router.get('/user/bets',
+            this._ufcController.ufc_get_bets_by_user
+        )
+
         /**
          * @swagger
          * /api/ufc/sync:

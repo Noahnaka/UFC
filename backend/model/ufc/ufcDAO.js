@@ -140,27 +140,20 @@ class UfcDAO extends UfcModel {
 
     create_bet = async () => {
         const pool = getConexao();
-        const metodoMapeado = {
-            "Unanimous Decision": "U-DEC",
-            "Submission": "SUB",
-            "Split Decision": "S-DEC",
-            "Knockout": "KO/TKO",
-            "DRAW": "DRAW"
-        }
-
-        const metodoFinal = metodoMapeado[this._metodo] || this._metodo;
 
         const query = `
-        INSERT INTO unibet.tbl_eventos_ufc (idUsuario, id_evento, idEvento, vencedor, metodo, rodada)
+        INSERT INTO unibet.tbl_apostas_ufc (id_cliente, id_evento, id_luta, vencedor, metodo, rodada)
         VALUES (?, ?, ?, ?, ?, ?)
         `;
+
+        console.log(this._id_cliente, this._id_evento, this._id_luta, this._vencedor, this._metodo, this._rodada);
         try {
             const [result] = await pool.promise().execute(query, [
-                this._idUsuario,
+                this._id_cliente,
                 this._id_evento,
-                this._idEvento,
+                this._id_luta,
                 this._vencedor,
-                metodoFinal,
+                this._metodo,
                 this._rodada
             ]);
             return result.affectedRows > 0;
@@ -168,6 +161,13 @@ class UfcDAO extends UfcModel {
             throw new Error('Erro ao criar aposta: ' + err);
         }
     };
+
+    UFC_read_bets_by_user = async () => {
+        const pool = getConexao();
+        const query = `SELECT * FROM unibet.tbl_apostas_ufc WHERE id_cliente = ?`;
+        const [result] = await pool.promise().execute(query, [this._id_cliente]);
+        return result;
+    }
 
     ufc_create_fight = async () => {
         const pool = getConexao();

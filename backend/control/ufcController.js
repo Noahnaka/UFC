@@ -264,9 +264,9 @@ module.exports = class UFCController {
             const { id_cliente, id_evento, id_luta, vencedor, rodada, metodo } = req.body;
             console.log(req.body);
             const ufc = new UFC();
-            ufc.idUsuario = id_cliente;    
+            ufc.id_cliente = id_cliente;    
             ufc.id_evento = id_evento;
-            ufc.idEvento = id_luta;
+            ufc.id_luta = id_luta;
             ufc.vencedor = vencedor;
             ufc.rodada = rodada;
             ufc.metodo = metodo;
@@ -329,6 +329,27 @@ module.exports = class UFCController {
             res.status(400).json({
                 status: false,
                 message: 'Erro ao buscar payload',
+                error: err.message,
+            });
+        }
+    };
+
+    ufc_get_bets_by_user = async (req, res) => {
+        try {
+            const ufc = new UFC();
+            ufc.id_cliente = req.query.id_cliente;
+
+            const resultado = await ufc.UFC_read_bets_by_user();
+
+        res.status(200).json({
+            status: true,
+            message: 'Apostas encontradas',
+            data: resultado,
+        });
+        } catch (err) {
+            res.status(400).json({
+                status: false,
+                message: 'Erro ao buscar apostas',
                 error: err.message,
             });
         }

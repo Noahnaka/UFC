@@ -10,16 +10,7 @@ CREATE TABLE unibet.tbl_cliente (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE unibet.tbl_apostas_ufc (
-    id_aposta INT PRIMARY KEY AUTO_INCREMENT,
-    id_cliente INTEGER NOT NULL,
-    id_ufc INTEGER NOT NULL,
-    id_evento INTEGER NOT NULL,
-    id_luta INTEGER NOT NULL,
-    id_vencedor INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (id_cliente) REFERENCES unibet.tbl_cliente(id_cliente)
-);
+
 
 CREATE TABLE unibet.tbl_eventos_ufc (
     id_evento INT PRIMARY KEY AUTO_INCREMENT,
@@ -39,6 +30,32 @@ CREATE TABLE unibet.tbl_lutas_ufc (
 	titulo TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_evento) REFERENCES unibet.tbl_eventos_ufc(id_evento) ON DELETE CASCADE
+);
+
+CREATE TABLE unibet.tbl_apostas_ufc (
+    id_aposta INT PRIMARY KEY AUTO_INCREMENT,
+    id_cliente INTEGER NOT NULL,
+    id_evento INTEGER NOT NULL,
+    id_luta INTEGER NOT NULL,
+    vencedor TEXT NOT NULL,
+    metodo TEXT NOT NULL,
+    rodada INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (id_cliente) REFERENCES unibet.tbl_cliente(id_cliente) ON DELETE CASCADE,
+    FOREIGN KEY (id_evento) REFERENCES unibet.tbl_eventos_ufc(id_evento) ON DELETE CASCADE,
+    FOREIGN KEY (id_luta) REFERENCES unibet.tbl_lutas_ufc(id_luta) ON DELETE CASCADE
+);
+
+CREATE TABLE unibet.tbl_vencedores_ufc (
+    id_vencedor INT PRIMARY KEY AUTO_INCREMENT,
+    id_evento INT NOT NULL,
+    id_luta INT NOT NULL,
+    vencedor TEXT NOT NULL,
+    metodo TEXT NOT NULL,
+    rodada INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_evento) REFERENCES unibet.tbl_eventos_ufc(id_evento) ON DELETE CASCADE,
+    FOREIGN KEY (id_luta) REFERENCES unibet.tbl_lutas_ufc(id_luta) ON DELETE CASCADE
 );
 
 

@@ -18,6 +18,15 @@ class UfcModel{
         this._blue_fighter = null;
         this._categoria = null;
         this._titulo = null;
+        this._id_cliente = null;
+        this._id_ufc = null;
+        this._id_evento = null;
+        this._id_luta = null;
+        this._vencedor = null;
+        this._metodo = null;
+        this._rodada = null;
+        this._evento = null;
+        this._data = null;
     }
 
     //setters
@@ -25,6 +34,7 @@ class UfcModel{
     set id_ufc(value) {
         this._id_ufc = value;
     }
+    
 
     set idUsuario(value) {
         this._idUsuario = value;
@@ -76,6 +86,18 @@ class UfcModel{
 
     set titulo(value) {
         this._titulo = value;
+    }
+
+    set local(value) {
+        this._local = value;
+    }
+
+    set lutas(value) {
+        this._lutas = value;
+    }
+
+    set id_cliente(value) {
+        this._id_cliente = value;
     }
 
     //getters
@@ -144,6 +166,17 @@ class UfcModel{
         return this._titulo;
     }
     
+    get local() {
+        return this._local;
+    }
+
+    get lutas() {
+        return this._lutas;
+    }
+
+    get id_cliente() {
+        return this._id_cliente;
+    }
 }
 
 module.exports = UfcModel;
