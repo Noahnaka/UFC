@@ -169,6 +169,10 @@ module.exports = class ClienteRouter {
             this._clienteController.createCliente
         );
 
+        this._router.get('/pontos/:id_cliente',
+            this._clienteController.getPontosCliente
+        );
+
         /**
          * @swagger
          * /api/cliente/login:

@@ -237,6 +237,10 @@ module.exports = class UfcRouter {
             this._ufcController.ufc_create_fight
         )
 
+        this._router.post('/vencedor',
+            this._ufcController.ufc_create_winner
+        )
+
         /**
          * @swagger
          * /api/conta/cliente/{id_cliente}:

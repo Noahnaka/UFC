@@ -334,6 +334,39 @@ module.exports = class UFCController {
         }
     };
 
+    ufc_create_winner = async (req, res) => {
+        try {
+            console.log("Body:" , req.body.id_evento);
+            const ufc = new UFC();
+            ufc.id_evento = req.body.id_evento;
+            ufc.id_luta = req.body.id_luta;
+            ufc.vencedor = req.body.winner;
+            ufc.rodada = req.body.round;
+            ufc.metodo = req.body.method;
+
+            const success = await ufc.ufc_winner();
+
+            if (success) {
+                res.status(200).json({
+                    status: true,
+                    message: 'Vencedor criado com sucesso',
+                });
+            } else {
+                res.status(400).json({
+                    status: false,
+                    message: 'Erro ao criar vencedor',
+                });
+            }
+        } catch (err) {
+            console.log(err);
+            res.status(400).json({
+                status: false,
+                message: 'Erro ao criar vencedor',
+                error: err.message,
+            });
+        }
+    };
+
     ufc_get_bets_by_user = async (req, res) => {
         try {
             const ufc = new UFC();

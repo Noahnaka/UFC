@@ -1,66 +1,70 @@
-const Cliente = require('../model/cliente/Cliente');
-const TokenJWT = require('../model/TokenJWT');
+const Pontos = require('../model/pontos/Pontos');
 
-module.exports = class ClienteController {
-    loginCliente = async (req, res) => {
+module.exports = class PontosController {
+
+    createPontos = async (req, res) => {
         try {
-            const { email_cliente, senha_cliente } = req.body;
+            console.log(req.body);
+            const { id_evento } = req.body;
 
-            const cliente = new Cliente();
-            cliente.email_cliente = email_cliente;
-            cliente.senha_cliente = senha_cliente;
-
-            const success = await cliente.login();
-
-            if (success) {
-                const jwt = new TokenJWT();
-                const token = jwt.gerar_token_cliente({
-                    id_cliente: cliente.id_cliente,
-                    nome_cliente: cliente.nome_cliente,
-                    sobrenome_cliente: cliente.sobrenome_cliente,
-                    email_cliente: cliente.email_cliente,
-                    celular_cliente: cliente.celular_cliente
+            if (!id_evento) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'ID do evento é obrigatório',
                 });
+            }
 
-                res.status(200).json({
+            const pontos = new Pontos();
+            const result = await pontos.create(id_evento);
+
+            if (result.success) {
+                res.status(201).json({
                     status: true,
-                    message: 'Cliente logado com sucesso',
-                    token: token,
+                    message: result.message,
                     data: {
-                        nome_cliente: cliente.nome_cliente,
-                        sobrenome_cliente: cliente.sobrenome_cliente,
-                        email_cliente: cliente.email_cliente,
-                        celular_cliente: cliente.celular_cliente
+                        id_evento: id_evento,
+                        pontosAtualizados: result.pontosAtualizados
                     }
                 });
             } else {
                 res.status(400).json({
                     status: false,
-                    message: 'Falha ao logar cliente',
+                    message: 'Falha ao calcular pontos',
                 });
             }
         } catch (err) {
-            res.status(401).json({
+            res.status(400).json({
                 status: false,
-                message: 'Email ou senha inválidos',
+                message: 'Erro ao calcular pontos',
                 error: err.message,
             });
         }
     };
-    
+
     getPontosCliente = async (req, res) => {
         try {
-            const cliente = new Cliente();
-            
-            const pontos = await cliente.getPontos(req.params.id_cliente); 
+            const { id_cliente } = req.params;
+
+            if (!id_cliente) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'ID do cliente é obrigatório',
+                });
+            }
+
+            const pontos = new Pontos();
+            const pontosCliente = await pontos.getPontosCliente(id_cliente);
 
             res.status(200).json({
                 status: true,
-                message: 'Pontos do cliente recuperado com sucesso',
-                data: pontos,
+                message: 'Pontos do cliente recuperados com sucesso',
+                data: {
+                    id_cliente: id_cliente,
+                    pontos: pontosCliente
+                }
             });
         } catch (err) {
-            res.status(400).json({
+            res.status(500).json({
                 status: false,
                 message: 'Erro ao buscar pontos do cliente',
                 error: err.message,
@@ -68,91 +72,20 @@ module.exports = class ClienteController {
         }
     };
 
-    getAllCliente = async (req, res) => {
+    getAllPontos = async (req, res) => {
         try {
-            const cliente = await Cliente.getAll();
+            const pontos = new Pontos();
+            const todosPontos = await pontos.getAllPontos();
 
             res.status(200).json({
                 status: true,
-                message: 'Get all cliente realizado com sucesso',
-                data: cliente,
+                message: 'Lista de pontos recuperada com sucesso',
+                data: todosPontos
             });
         } catch (err) {
             res.status(500).json({
                 status: false,
-                message: 'Erro ao buscar cliente',
-                error: err.message,
-            });
-        }
-    };
-
-    getClienteById = async (req, res) => {
-        try {
-            const cliente = await Cliente.getById(req.params.id_cliente);
-
-            if (!cliente) {
-                return res.status(404).json({
-                    status: false,
-                    message: 'Cliente não encontrado',
-                });
-            }
-
-            res.status(200).json({
-                status: true,
-                message: 'Cliente recuperado com sucesso',
-                data: cliente,
-            });
-        } catch (err) {
-            res.status(404).json({
-                status: false,
-                message: 'Erro ao buscar cliente',
-                error: err.message,
-            });
-        }
-    };
-
-    createCliente = async (req, res) => {
-        try {
-            const { nome_cliente, email_cliente, senha_cliente, celular_cliente } = req.body;
-
-            const cliente = new Cliente();
-            cliente.nome_cliente = nome_cliente;    
-            cliente.email_cliente = email_cliente;
-            cliente.senha_cliente = senha_cliente;
-            cliente.celular_cliente = celular_cliente;
-
-            const success = await cliente.create();
-
-            if (success) {
-                const jwt = new TokenJWT();
-                
-                const token = jwt.gerar_token_cliente({
-                    id_cliente: cliente.id_cliente,
-                    nome_cliente: cliente.nome_cliente,
-                    email_cliente: cliente.email_cliente,
-                    celular_cliente: cliente.celular_cliente
-                });
-
-                res.status(201).json({
-                    status: true,
-                    message: 'Cliente criado com sucesso',
-                    token: token,
-                    data: {
-                        nome_cliente: cliente.nome_cliente,
-                        email_cliente: cliente.email_cliente,
-                        celular_cliente: cliente.celular_cliente
-                    }
-                });
-            } else {
-                res.status(400).json({
-                    status: false,
-                    message: 'Falha ao criar cliente',
-                });
-            }
-        } catch (err) {
-            res.status(400).json({
-                status: false,
-                message: 'Erro ao criar cliente',
+                message: 'Erro ao buscar todos os pontos',
                 error: err.message,
             });
         }

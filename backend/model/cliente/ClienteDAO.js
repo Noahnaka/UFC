@@ -133,6 +133,14 @@ class ClienteDAO extends ClienteModel {
             throw new Error('Erro ao verificar e-mail duplicado');
         }
     };
+
+    getPontos = async (id_cliente) => {
+        const pool = getConexao();
+        const query = `SELECT pontos_cliente FROM unibet.tbl_cliente WHERE id_cliente = ?`;
+        const [rows] = await pool.promise().execute(query, [id_cliente]);
+        return rows[0];
+    };
+
 }
 
 module.exports = ClienteDAO;

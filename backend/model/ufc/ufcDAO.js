@@ -146,7 +146,6 @@ class UfcDAO extends UfcModel {
         VALUES (?, ?, ?, ?, ?, ?)
         `;
 
-        console.log(this._id_cliente, this._id_evento, this._id_luta, this._vencedor, this._metodo, this._rodada);
         try {
             const [result] = await pool.promise().execute(query, [
                 this._id_cliente,
@@ -161,6 +160,23 @@ class UfcDAO extends UfcModel {
             throw new Error('Erro ao criar aposta: ' + err);
         }
     };
+
+    ufc_winner = async () => {
+        const pool = getConexao();
+        const query = `
+        INSERT INTO unibet.tbl_vencedores_ufc (id_evento, id_luta, vencedor, rodada, metodo)
+        VALUES (?, ?, ?, ?, ?)
+        `;
+
+        console.log(this._id_evento, this._id_luta, this._vencedor, this._rodada, this._metodo);
+
+        try {
+            const [result] = await pool.promise().execute(query, [this._id_evento, this._id_luta, this._vencedor, this._rodada, this._metodo]);
+            return result.affectedRows > 0;
+        } catch (err) {
+            throw new Error('Erro ao criar vencedor: ' + err);
+        }
+    }
 
     UFC_read_bets_by_user = async () => {
         const pool = getConexao();
