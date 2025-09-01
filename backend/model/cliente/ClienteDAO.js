@@ -44,8 +44,8 @@ class ClienteDAO extends ClienteModel {
         const hashedPassword = await ClienteDAO.hashPassword(this._senha_cliente);
 
         const query = `
-        INSERT INTO unibet.tbl_cliente (nome_cliente, email_cliente, senha_cliente, celular_cliente)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO unibet.tbl_cliente (nome_cliente, email_cliente, senha_cliente, celular_cliente, nivel_acesso_cliente)
+        VALUES (?, ?, ?, ?, ?)
         `;
         try {
             const [result] = await pool.promise().execute(query, [
@@ -53,6 +53,7 @@ class ClienteDAO extends ClienteModel {
                 this._email_cliente.toLowerCase().trim(),
                 hashedPassword,
                 this._celular_cliente,
+                'eco',
             ]);
             
             if (result.affectedRows > 0) {
@@ -97,6 +98,13 @@ class ClienteDAO extends ClienteModel {
         }
     };
 
+    updateAcesso = async () => {
+        const pool = getConexao();
+        const query = `UPDATE unibet.tbl_cliente SET nivel_acesso_cliente = ? WHERE id_cliente = ?`;
+        const [result] = await pool.promise().execute(query, [this._nivel_acesso_cliente, this._id_cliente]);
+        return result.affectedRows > 0;
+    };
+
     login = async () => {
         const pool = getConexao();
         const query = 'SELECT * FROM unibet.tbl_cliente WHERE email_cliente = ?';
@@ -114,6 +122,7 @@ class ClienteDAO extends ClienteModel {
             this._nome_cliente = cliente.nome_cliente;
             this._email_cliente = cliente.email_cliente;
             this._celular_cliente = cliente.celular_cliente;
+            this._nivel_acesso_cliente = cliente.nivel_acesso_cliente;
             
             return true;
         } catch (err) {

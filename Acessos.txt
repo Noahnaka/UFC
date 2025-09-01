@@ -1,0 +1,3 @@
+Niveis de acesso:
+Basico - 'cliente'
+Pago - 'premium'

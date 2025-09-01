@@ -1,2 +1,0 @@
-1- Metodo para metodo de comparação quando for salvar nao esta salvando corretamente
-2- id_evento para salvar o ID da luta nao esta enviando certo, sempre 1

@@ -173,6 +173,10 @@ module.exports = class ClienteRouter {
             this._clienteController.getPontosCliente
         );
 
+        this._router.put('/acesso/:id_cliente',
+            this._clienteController.updateAcessoCliente
+        );
+
         /**
          * @swagger
          * /api/cliente/login:

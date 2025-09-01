@@ -7,6 +7,7 @@ CREATE TABLE unibet.tbl_cliente (
     senha_cliente TEXT NOT NULL,
     celular_cliente TEXT NOT NULL,
     pontos_cliente INTEGER DEFAULT 0,
+    nivel_acesso_cliente TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

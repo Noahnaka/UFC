@@ -30,7 +30,8 @@ module.exports = class ClienteController {
                         nome_cliente: cliente.nome_cliente,
                         sobrenome_cliente: cliente.sobrenome_cliente,
                         email_cliente: cliente.email_cliente,
-                        celular_cliente: cliente.celular_cliente
+                        celular_cliente: cliente.celular_cliente,
+                        nivel_acesso_cliente: cliente.nivel_acesso_cliente
                     }
                 });
             } else {
@@ -43,6 +44,38 @@ module.exports = class ClienteController {
             res.status(401).json({
                 status: false,
                 message: 'Email ou senha inválidos',
+                error: err.message,
+            });
+        }
+    };
+
+    updateAcessoCliente = async (req, res) => {
+        try {
+
+            const cliente = new Cliente();
+            cliente.id_cliente = req.params.id_cliente;
+            cliente.nivel_acesso_cliente = req.body.nivel_acesso_cliente;
+
+            const success = await cliente.updateAcesso();
+
+            console.log(success);
+
+            if (success) {
+                res.status(200).json({
+                    status: true,
+                    message: 'Acesso do cliente atualizado com sucesso',
+                    data: cliente,
+                });
+            } else {
+                res.status(200).json({
+                    status: false,
+                    message: 'Nenhuma alteração foi feita, os dados são iguais.',
+                });
+            }
+        } catch (err) {
+            res.status(400).json({
+                status: false,
+                message: 'Erro ao atualizar acesso do cliente',
                 error: err.message,
             });
         }

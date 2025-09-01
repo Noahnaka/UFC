@@ -5,6 +5,7 @@ class ClienteModel{
         this._email_cliente = null;
         this._senha_cliente = null;
         this._celular_cliente = null;
+        this._nivel_acesso_cliente = null;
     }
 
     //setters
@@ -29,6 +30,10 @@ class ClienteModel{
         this._celular_cliente = value;
     }
 
+    set nivel_acesso_cliente(value) {
+        this._nivel_acesso_cliente = value;
+    }
+
     //getters
 
     get id_cliente() {
@@ -49,6 +54,10 @@ class ClienteModel{
 
     get celular_cliente() {
         return this._celular_cliente;
+    }
+
+    get nivel_acesso_cliente() {
+        return this._nivel_acesso_cliente;
     }
 
 
