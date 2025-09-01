@@ -195,6 +195,27 @@ module.exports = class UFCController {
         }
     };    
 
+    ufc_get_odds_by_id = async (req, res) => {
+        try {
+            const ufc = new UFC();
+            ufc.id_luta = req.params.id_luta;
+
+            const resultado = await ufc.ufc_read_odds_by_id();
+
+            res.status(200).json({
+                status: true,
+                message: 'Odds encontradas',
+                data: resultado,
+            });
+        } catch (err) {
+            res.status(404).json({
+                status: false,
+                message: 'Erro ao buscar odds',
+                error: err.message,
+            });
+        }
+    };
+
     ufc_create_event = async (req, res) => {
         try {
             const { nome_evento, local_evento, data_evento } = req.body;

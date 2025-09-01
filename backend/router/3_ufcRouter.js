@@ -233,6 +233,10 @@ module.exports = class UfcRouter {
             this._ufcController.ufc_create_event
         )
 
+        this._router.get('/lutas/odds/:id_luta',
+            this._ufcController.ufc_get_odds_by_id
+        )
+
         this._router.post('/create/fight',
             this._ufcController.ufc_create_fight
         )
