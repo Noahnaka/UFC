@@ -10,13 +10,22 @@ class Banco {
 
     static conectar() {
         if (Banco.CONEXAO === null) {
-            Banco.CONEXAO = mysql.createConnection({
-                host: Banco.HOST,
-                user: Banco.USER,
-                password: Banco.PWD,
-                database: Banco.DB,
-                port: Banco.PORT
-            });
+            const databaseUrl = process.env.DATABASE_URL || process.env.MYSQL_URL;
+
+            if (databaseUrl) {
+                // Prefer a single DATABASE_URL if provided (e.g., Railway)
+                // mysql2 supports connection URIs directly
+                Banco.CONEXAO = mysql.createConnection(databaseUrl);
+            } else {
+                // Fallback to discrete env vars
+                Banco.CONEXAO = mysql.createConnection({
+                    host: Banco.HOST,
+                    user: Banco.USER,
+                    password: Banco.PWD,
+                    database: Banco.DB,
+                    port: Banco.PORT
+                });
+            }
 
             Banco.CONEXAO.connect((err) => {
                 if (err) {
@@ -26,7 +35,7 @@ class Banco {
                         erro: err.message
                     };
                     console.error(JSON.stringify(objResposta));
-                    process.exit(1); 
+                    process.exit(1);
                 }
             });
         }
