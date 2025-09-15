@@ -34,7 +34,7 @@ class Servidor {
         this._porta = process.env.PORT;
         this._app = express();
         this._app.use(cors({
-            origin: ['http://localhost:3000', 'http://localhost:8080', 'https://univapbet.shop'],
+            origin: ['http://localhost:3000', 'http://localhost:8080', 'https://univapbet.store'],
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization'],
             credentials: true,
