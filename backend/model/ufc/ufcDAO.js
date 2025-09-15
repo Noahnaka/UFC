@@ -210,11 +210,11 @@ class UfcDAO extends UfcModel {
     ufc_create_event = async () => {
         const pool = getConexao();
         const query = `
-        INSERT INTO tbl_eventos_ufc (nome_evento, local_evento, data_evento)
-        VALUES (?, ?, ?)
+        INSERT INTO tbl_eventos_ufc (nome_evento, local_evento, data_evento, status_evento)
+        VALUES (?, ?, ?, ?)
         `;
         try {
-            const [result] = await pool.promise().execute(query, [this._nome_evento, this._local_evento, this._data_evento]);   
+            const [result] = await pool.promise().execute(query, [this._nome_evento, this._local_evento, this._data_evento, 1]);   
             return result.affectedRows > 0;
         } catch (err) {
             throw new Error('Erro ao criar evento: ' + err);
