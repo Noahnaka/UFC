@@ -9,15 +9,15 @@ class PontosDAO extends PontosModel {
 
         try {
             const queryVencedores = `
-                SELECT * FROM unibet.tbl_vencedores_ufc WHERE id_evento = ?
+                SELECT * FROM tbl_vencedores_ufc WHERE id_evento = ?
             `;
 
             const queryApostas = `
-                SELECT * FROM unibet.tbl_apostas_ufc WHERE id_evento = ?
+                SELECT * FROM tbl_apostas_ufc WHERE id_evento = ?
             `;
 
             const queryClientes = `
-                SELECT * FROM unibet.tbl_cliente
+                SELECT * FROM tbl_cliente
             `;
 
             const [vencedores] = await pool.promise().execute(queryVencedores, [idEvento]);
@@ -62,7 +62,7 @@ class PontosDAO extends PontosModel {
             });
 
             const updateQuery = `
-                UPDATE unibet.tbl_cliente 
+                UPDATE tbl_cliente 
                 SET pontos_cliente = pontos_cliente + ? 
                 WHERE id_cliente = ?
             `;
@@ -87,7 +87,7 @@ class PontosDAO extends PontosModel {
 
         try {
             const query = `
-                SELECT pontos_cliente FROM unibet.tbl_cliente WHERE id_cliente = ?
+                SELECT pontos_cliente FROM tbl_cliente WHERE id_cliente = ?
             `;
 
             const [result] = await pool.promise().execute(query, [idCliente]);
@@ -108,7 +108,7 @@ class PontosDAO extends PontosModel {
         try {
             const query = `
                 SELECT id_cliente, nome_cliente, pontos_cliente 
-                FROM unibet.tbl_cliente 
+                FROM tbl_cliente 
                 ORDER BY pontos_cliente DESC
             `;
 

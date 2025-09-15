@@ -16,7 +16,7 @@ class ClienteDAO extends ClienteModel {
     static getAll = async () => {
         const pool = getConexao();
         try {
-            const [rows] = await pool.promise().execute('SELECT * FROM unibet.tbl_cliente');
+            const [rows] = await pool.promise().execute('SELECT * FROM tbl_cliente');
             return rows;
         } catch (err) {
             throw new Error('Erro ao buscar cliente');
@@ -31,7 +31,7 @@ class ClienteDAO extends ClienteModel {
         }
     
         try {
-            const query = `SELECT * FROM unibet.tbl_cliente WHERE id_cliente = ?`;
+            const query = `SELECT * FROM tbl_cliente WHERE id_cliente = ?`;
             const [rows] = await pool.promise().execute(query, [id_cliente]);
             return rows[0]; 
         } catch (err) {
@@ -44,7 +44,7 @@ class ClienteDAO extends ClienteModel {
         const hashedPassword = await ClienteDAO.hashPassword(this._senha_cliente);
 
         const query = `
-        INSERT INTO unibet.tbl_cliente (nome_cliente, email_cliente, senha_cliente, celular_cliente, nivel_acesso_cliente)
+        INSERT INTO tbl_cliente (nome_cliente, email_cliente, senha_cliente, celular_cliente, nivel_acesso_cliente)
         VALUES (?, ?, ?, ?, ?)
         `;
         try {
@@ -69,7 +69,7 @@ class ClienteDAO extends ClienteModel {
     delete = async () => {
         const pool = getConexao();
         const query = `
-            DELETE FROM unibet.tbl_cliente 
+            DELETE FROM tbl_cliente 
             WHERE id_cliente = ?
         `;
 
@@ -85,7 +85,7 @@ class ClienteDAO extends ClienteModel {
         const pool = getConexao();
 
         const query = `
-            UPDATE unibet.tbl_cliente
+            UPDATE tbl_cliente
             SET status_cliente = NOT status_cliente
             WHERE id_cliente = ?
         `;
@@ -100,14 +100,14 @@ class ClienteDAO extends ClienteModel {
 
     updateAcesso = async () => {
         const pool = getConexao();
-        const query = `UPDATE unibet.tbl_cliente SET nivel_acesso_cliente = ? WHERE id_cliente = ?`;
+        const query = `UPDATE tbl_cliente SET nivel_acesso_cliente = ? WHERE id_cliente = ?`;
         const [result] = await pool.promise().execute(query, [this._nivel_acesso_cliente, this._id_cliente]);
         return result.affectedRows > 0;
     };
 
     login = async () => {
         const pool = getConexao();
-        const query = 'SELECT * FROM unibet.tbl_cliente WHERE email_cliente = ?';
+        const query = 'SELECT * FROM tbl_cliente WHERE email_cliente = ?';
         
         try {
             const [rows] = await pool.promise().execute(query, [this._email_cliente.toLowerCase().trim()]);
@@ -134,7 +134,7 @@ class ClienteDAO extends ClienteModel {
         const pool = getConexao();
         try {
             const [rows] = await pool.promise().execute(
-                'SELECT id_cliente FROM unibet.tbl_cliente WHERE email_cliente = ?', 
+                'SELECT id_cliente FROM tbl_cliente WHERE email_cliente = ?', 
                 [email_cliente.toLowerCase().trim()]
             );
             return rows.length > 0;
@@ -145,7 +145,7 @@ class ClienteDAO extends ClienteModel {
 
     getPontos = async (id_cliente) => {
         const pool = getConexao();
-        const query = `SELECT pontos_cliente FROM unibet.tbl_cliente WHERE id_cliente = ?`;
+        const query = `SELECT pontos_cliente FROM tbl_cliente WHERE id_cliente = ?`;
         const [rows] = await pool.promise().execute(query, [id_cliente]);
         return rows[0];
     };

@@ -8,8 +8,8 @@ class UfcDAO extends UfcModel {
     UFC_get_payload = async () => {
         const pool = getConexao();
         try{
-            const [usuarios] = await pool.promise().execute('SELECT COUNT(*) as total FROM unibet.tbl_cliente');
-            const [apostas] = await pool.promise().execute('SELECT COUNT(*) as total FROM unibet.tbl_apostas_ufc');
+            const [usuarios] = await pool.promise().execute('SELECT COUNT(*) as total FROM tbl_cliente');
+            const [apostas] = await pool.promise().execute('SELECT COUNT(*) as total FROM tbl_apostas_ufc');
             
             return {
                 total_usuarios: usuarios[0].total,
@@ -23,7 +23,7 @@ class UfcDAO extends UfcModel {
     UFC_read_all = async () => {
         const pool = getConexao();
         try {
-            const [rows] = await pool.promise().execute('SELECT * FROM unibet.tbl_eventos_ufc');
+            const [rows] = await pool.promise().execute('SELECT * FROM tbl_eventos_ufc');
             return rows;
         } catch (err) {
             throw new Error('Erro ao buscar apostas UFC');
@@ -34,7 +34,7 @@ class UfcDAO extends UfcModel {
         const pool = getConexao();
         
         const query = `
-            UPDATE unibet.tbl_lutas_ufc 
+            UPDATE tbl_lutas_ufc 
             SET red_fighter = ?, blue_fighter = ?, categoria = ?, titulo = ?
             WHERE id_luta = ?
         `;
@@ -57,7 +57,7 @@ class UfcDAO extends UfcModel {
         const pool = getConexao();
         
         const query = `
-            DELETE from unibet.tbl_eventos_ufc WHERE id_evento = ?
+            DELETE from tbl_eventos_ufc WHERE id_evento = ?
         `;
         
         try {
@@ -74,7 +74,7 @@ class UfcDAO extends UfcModel {
         const pool = getConexao();
         
         const query = `
-            DELETE from unibet.tbl_lutas_ufc WHERE id_luta = ?
+            DELETE from tbl_lutas_ufc WHERE id_luta = ?
         `;
         
         try {
@@ -91,7 +91,7 @@ class UfcDAO extends UfcModel {
         const pool = getConexao();
         
         const query = `
-            UPDATE unibet.tbl_eventos_ufc 
+            UPDATE tbl_eventos_ufc 
             SET status_evento = !status_evento
             WHERE id_evento = ?
         `;
@@ -114,7 +114,7 @@ class UfcDAO extends UfcModel {
         }
     
         try {
-            const query = `SELECT * FROM unibet.tbl_lutas_ufc WHERE id_evento = ?`;
+            const query = `SELECT * FROM tbl_lutas_ufc WHERE id_evento = ?`;
             const [rows] = await await pool.promise().execute(query, [id_evento]);
             return rows; 
         } catch (err) {
@@ -130,7 +130,7 @@ class UfcDAO extends UfcModel {
         }
     
         try {
-            const query = `SELECT * FROM unibet.tbl_eventos_ufc WHERE id_evento = ?`;
+            const query = `SELECT * FROM tbl_eventos_ufc WHERE id_evento = ?`;
             const [rows] = await pool.query(query, [id_ufc]);
             return rows[0]; 
         } catch (err) {
@@ -142,7 +142,7 @@ class UfcDAO extends UfcModel {
         const pool = getConexao();
 
         const query = `
-        INSERT INTO unibet.tbl_apostas_ufc (id_cliente, id_evento, id_luta, vencedor, metodo, rodada)
+        INSERT INTO tbl_apostas_ufc (id_cliente, id_evento, id_luta, vencedor, metodo, rodada)
         VALUES (?, ?, ?, ?, ?, ?)
         `;
 
@@ -164,7 +164,7 @@ class UfcDAO extends UfcModel {
     ufc_winner = async () => {
         const pool = getConexao();
         const query = `
-        INSERT INTO unibet.tbl_vencedores_ufc (id_evento, id_luta, vencedor, rodada, metodo)
+        INSERT INTO tbl_vencedores_ufc (id_evento, id_luta, vencedor, rodada, metodo)
         VALUES (?, ?, ?, ?, ?)
         `;
 
@@ -180,7 +180,7 @@ class UfcDAO extends UfcModel {
 
     UFC_read_bets_by_user = async () => {
         const pool = getConexao();
-        const query = `SELECT * FROM unibet.tbl_apostas_ufc WHERE id_cliente = ?`;
+        const query = `SELECT * FROM tbl_apostas_ufc WHERE id_cliente = ?`;
         const [result] = await pool.promise().execute(query, [this._id_cliente]);
         return result;
     }
@@ -188,7 +188,7 @@ class UfcDAO extends UfcModel {
     ufc_create_fight = async () => {
         const pool = getConexao();
         const query = `
-        INSERT INTO unibet.tbl_lutas_ufc (id_evento, red_fighter, blue_fighter, categoria, titulo)
+        INSERT INTO tbl_lutas_ufc (id_evento, red_fighter, blue_fighter, categoria, titulo)
         VALUES (?, ?, ?, ?, ?)
         `;
         try {
@@ -201,7 +201,7 @@ class UfcDAO extends UfcModel {
 
     ufc_read_odds_by_id = async () => {
         const pool = getConexao();
-        const query = `SELECT * FROM unibet.tbl_apostas_ufc WHERE id_luta = ?`;
+        const query = `SELECT * FROM tbl_apostas_ufc WHERE id_luta = ?`;
         const [result] = await pool.promise().execute(query, [this._id_luta]);
         console.log(result);
         return result;
@@ -210,7 +210,7 @@ class UfcDAO extends UfcModel {
     ufc_create_event = async () => {
         const pool = getConexao();
         const query = `
-        INSERT INTO unibet.tbl_eventos_ufc (nome_evento, local_evento, data_evento)
+        INSERT INTO tbl_eventos_ufc (nome_evento, local_evento, data_evento)
         VALUES (?, ?, ?)
         `;
         try {

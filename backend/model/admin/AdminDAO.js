@@ -18,7 +18,7 @@ class AdminDAO extends AdminModel {
         const hashedPassword = await AdminDAO.hashPassword(this._senha_admin);
 
         const query = `
-        INSERT INTO unibet.tbl_admin (email_admin, senha_admin)
+        INSERT INTO tbl_admin (email_admin, senha_admin)
         VALUES (?, ?)
         `;
         try {
@@ -39,7 +39,7 @@ class AdminDAO extends AdminModel {
 
     login = async () => {
         const pool = getConexao();
-        const query = 'SELECT * FROM unibet.tbl_admin WHERE email_admin = ?';
+        const query = 'SELECT * FROM tbl_admin WHERE email_admin = ?';
         
         try {
             const [rows] = await pool.promise().execute(query, [this._email_admin.toLowerCase().trim()]);
@@ -63,7 +63,7 @@ class AdminDAO extends AdminModel {
         const pool = getConexao();
         try {
             const [rows] = await pool.promise().execute(
-                'SELECT id_admin FROM unibet.tbl_admin WHERE email_admin = ?', 
+                'SELECT id_admin FROM tbl_admin WHERE email_admin = ?',
                 [email_admin.toLowerCase().trim()]
             );
             return rows.length > 0;
